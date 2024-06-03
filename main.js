@@ -30,7 +30,7 @@ function colour_darken(colour) {
   return false
 }
 
-function bouncing_ball(start_time, length, colour, start_x, start_y, vx, vy, size, shrink) {
+function bouncing_ball(start_time, length, colour, start, speed, size, shrink) {
   function render(t) {
 
     const delta = t - start_time;
@@ -41,10 +41,13 @@ function bouncing_ball(start_time, length, colour, start_x, start_y, vx, vy, siz
       console.log(colour, "is Done")
       return noop
     }
-    let x  = start_x + delta * vx;
-    let y = start_y + (vy * delta) + (G/2 * Math.pow(delta,2))
+    let x  = start.x + delta * speed.x;
+    let y = start.y + (speed.y * delta) + (G/2 * Math.pow(delta,2))
     size = size - shrink * delta;
     size = Math.max(0, size);
+    if (size == 0) {
+      return noop;
+    }
     const floor = 100;
     ctx.fillStyle = colour
     ctx.strokeStyle = colour
@@ -60,8 +63,8 @@ function bouncing_ball(start_time, length, colour, start_x, start_y, vx, vy, siz
         colour, 
         x,
         floor,
-        vx,
-        (vy + G *delta) * -0.8,
+        speed.x,
+        (speed.y + G *delta) * -0.8,
         size,
         shrink
       );
@@ -72,7 +75,7 @@ function bouncing_ball(start_time, length, colour, start_x, start_y, vx, vy, siz
 }
 
 
-function static_ball(start_time, length, colour, start_x, start_y, size) {
+function static_ball(start_time, length, colour, start, size) {
   function render(t) {
 
     const delta = t - start_time;
@@ -87,7 +90,7 @@ function static_ball(start_time, length, colour, start_x, start_y, size) {
     ctx.fillStyle = colour
     ctx.strokeStyle = colour
     ctx.beginPath();
-    ctx.arc(start_x, start_y, size, 0, 2 * Math.PI);
+    ctx.arc(start.x, start.y, size, 0, 2 * Math.PI);
     ctx.fill()
     ctx.stroke()
     return true
@@ -95,9 +98,8 @@ function static_ball(start_time, length, colour, start_x, start_y, size) {
   return render;
 }
 
-function falling_ball(start_time, length, colour, start_x, start_y, vx, vy, size) {
+function falling_ball(start_time, length, colour, start, speed, size) {
   function render(t) {
-
     const delta = t - start_time;
     if (delta < 0) {
       console.log(colour, "is Skipped", delta)
@@ -107,8 +109,8 @@ function falling_ball(start_time, length, colour, start_x, start_y, vx, vy, size
       console.log(colour, "is Done")
       return false
     }
-    let x  = start_x + delta * vx;
-    let y = start_y + (vy * delta) + (0.5 * G * Math.pow(delta,2))
+    let x  = start.x + delta * speed.x;
+    let y = start.y + (speed.y * delta) + (0.5 * G * Math.pow(delta,2))
     ctx.fillStyle = colour
     ctx.strokeStyle = colour
     ctx.beginPath();
@@ -164,10 +166,8 @@ function randomColor() {
 let life_time = 10;
 objects_rendering.push(bouncing_ball(now_s(), Number.POSITIVE_INFINITY, 
   "blue", 
-  25,
-  25,
-  15,
-  30,
+  {x:25, y:25},
+  {x:15, y:30},
   20,
   0
 ));
@@ -175,35 +175,42 @@ objects_rendering.push(bouncing_ball(now_s(), Number.POSITIVE_INFINITY,
 function smoke_effect() {
   return bouncing_ball(now_s(), life_time, 
     smokeColour(), 
-    200,
-    50,
-    Math.random() * 20 - 10,
-    Math.random() * -80,
+    {x:200, y:50},
+    {
+      x:Math.random() * 20 - 10,
+      y:Math.random() * -80
+    },
     2,
     0.05
   );
 }
 
-// Throw a ball from 1 -> 2 in time
-function juggling_ball(x1, y1, x2, y2, time, colour) {
-  vx = (x2 - x1) / time;
-  vy = 0 - ((y2 - y1) - (time - 0.5 * G * time))
-  return falling_ball(now_s(), time, colour, x1, y1, vx, vy, 10);
+// Throw a ball from `from` to `to` in `time` seconds
+function juggling_ball(from, to, time, colour) {
+  vx = (to.x - from.x) / time;
+  vy = 0 - ((to.y - from.y) - (time - 0.5 * G * time))
+  return falling_ball(now_s(), time, colour, from, {x:vx, y:vy}, 10);
 }
 
+/*
 objects_rendering.push(smoke_effect())
 setInterval(() => {
  objects_rendering.push(smoke_effect())
-}, 50)
+}, 500)
+*/
 
 
 ball_count = 0;
 ball_time = 3;
+
+pull_in = 50
+left_hand = {x:150, y:200}
+left_hand_i = {x:left_hand.x + pull_in, y:200}
+right_hand = {x:300, y:200}
+right_hand_i = {x:right_hand.x - pull_in, y:200}
+
 setInterval(() => {
-  x1 = 100;
-  x2 = 200;
-  y1 = 200;
-  y2 = 200;
+
   let colour = "red";
   if (ball_count % 3 == 1) {
     colour = "black";
@@ -212,24 +219,19 @@ setInterval(() => {
     colour = "blue";
   }
 
-  
-  start_x = x1
-  start_y = y1
-  end_x = x2
-  end_y = y2
+  start = left_hand_i
+  end = right_hand
   if (ball_count % 2 == 1) {
-    start_x = x2
-    start_y = y2
-    end_x = x1
-    end_y = y1
+    start = right_hand_i
+    end = left_hand
   }
   console.log("Adding juggling ball");
-  objects_rendering.push(juggling_ball(start_x, start_y, end_x, end_y, ball_time, colour))
-  objects_rendering.push(static_ball(now_s() + ball_time, ball_time/2, colour, end_x, end_y, 10))
+  objects_rendering.push(juggling_ball(start, end, ball_time, colour))
+  objects_rendering.push(static_ball(now_s() + ball_time, ball_time/2, colour, end, 10))
   ball_count += 1;
 }, (ball_time * 500))
-objects_rendering.push(static_ball(now_s(), Number.POSITIVE_INFINITY, "black", 100, 200, 5 ));
-objects_rendering.push(static_ball(now_s(), Number.POSITIVE_INFINITY, "black", 200, 200, 5 ));
+objects_rendering.push(static_ball(now_s(), Number.POSITIVE_INFINITY, "black", left_hand, 5 ));
+objects_rendering.push(static_ball(now_s(), Number.POSITIVE_INFINITY, "black", right_hand, 5 ));
 
 function loop() {
 draw();
