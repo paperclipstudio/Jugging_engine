@@ -9,7 +9,7 @@ const ctx = canvas.getContext("2d")
 ctx.fillStyle = "green"
 let date = new Date()
 let start_time = date.getTime();
-const G = 100;
+const G = 200;
 
 let objects_rendering = [];
 
@@ -38,7 +38,6 @@ function bouncing_ball(start_time, length, colour, start, speed, size, shrink) {
       return true
     }
     if (delta > length) {
-      console.log(colour, "is Done")
       return noop
     }
     let x  = start.x + delta * speed.x;
@@ -80,7 +79,6 @@ function static_ball(start_time, length, colour, start, size) {
 
     const delta = t - start_time;
     if (delta < 0) {
-      console.log(colour, "is Skipped", delta)
       return true
     }
     if (delta > length) {
@@ -98,11 +96,33 @@ function static_ball(start_time, length, colour, start, size) {
   return render;
 }
 
+function linear_ball(start_time, length, colour, start, end, size) {
+  function render(t) {
+    const delta = t - start_time;
+    if (delta < 0) {
+      return true
+    }
+    if (delta > length) {
+      console.log(colour, "is Done")
+      return false
+    }
+    let x = start.x + (end.x - start.x) * delta/length;
+    let y = start.y + (end.y - start.y) * delta/length;
+    ctx.fillStyle = colour
+    ctx.strokeStyle = colour
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, 2 * Math.PI);
+    ctx.fill()
+    ctx.stroke()
+    return true
+  }
+  return render;
+}
+
 function falling_ball(start_time, length, colour, start, speed, size) {
   function render(t) {
     const delta = t - start_time;
     if (delta < 0) {
-      console.log(colour, "is Skipped", delta)
       return true
     }
     if (delta > length) {
@@ -188,7 +208,7 @@ function smoke_effect() {
 // Throw a ball from `from` to `to` in `time` seconds
 function juggling_ball(from, to, time, colour) {
   vx = (to.x - from.x) / time;
-  vy = 0 - ((to.y - from.y) - (time - 0.5 * G * time))
+  vy = ((to.y - from.y) / time) - (0.5 * G * time)
   return falling_ball(now_s(), time, colour, from, {x:vx, y:vy}, 10);
 }
 
@@ -201,14 +221,58 @@ setInterval(() => {
 
 
 ball_count = 0;
-ball_time = 3;
+ball_time = 0.5;
 
-pull_in = 50
+pull_in = 40
 left_hand = {x:150, y:200}
 left_hand_i = {x:left_hand.x + pull_in, y:200}
 right_hand = {x:300, y:200}
 right_hand_i = {x:right_hand.x - pull_in, y:200}
+canvas.onclick = function(e) {
+  if (e.ctrlKey) {
+    right_hand = {x:e.offsetX, y:e.offsetY}
+    right_hand_i = {x:right_hand.x - pull_in, y:e.offsetY}
+  } else {
+    left_hand = {x:e.offsetX, y:e.offsetY}
+    left_hand_i = {x:left_hand.x + pull_in, y:e.offsetY}
+  }
+};
 
+// Three ball shower
+setInterval(() => {
+
+  let colour = "red";
+  if (ball_count % 6 == 1) {
+    colour = "red";
+  }
+  if (ball_count % 6 == 2) {
+    colour = "black";
+  }
+  if (ball_count % 6 == 3) {
+    colour = "black";
+  }
+  if (ball_count % 6 == 4) {
+    colour = "blue";
+  }
+  if (ball_count % 6 == 5) {
+    colour = "blue";
+  }
+
+  if (ball_count % 2 == 0) {
+    // 1 throw
+    console.log("1 throw");
+    objects_rendering.push(juggling_ball(right_hand, left_hand, ball_time, colour))
+  } else {
+    // 5 throw
+    console.log("5 throw");
+    objects_rendering.push(juggling_ball(left_hand, right_hand, ball_time * 5, colour))
+  }
+  console.log("Adding juggling ball");
+  ball_count += 1;
+  objects_rendering.push(static_ball(now_s(), ball_time, "black", left_hand, 5 ));
+  objects_rendering.push(static_ball(now_s(), ball_time, "black", right_hand, 5 ));
+}, (ball_time * 1000))
+/*
 setInterval(() => {
 
   let colour = "red";
@@ -221,21 +285,25 @@ setInterval(() => {
 
   start = left_hand_i
   end = right_hand
+  ready = right_hand_i
   if (ball_count % 2 == 1) {
     start = right_hand_i
     end = left_hand
+    ready = left_hand_i
   }
   console.log("Adding juggling ball");
   objects_rendering.push(juggling_ball(start, end, ball_time, colour))
-  objects_rendering.push(static_ball(now_s() + ball_time, ball_time/2, colour, end, 10))
+  objects_rendering.push(linear_ball(now_s() + ball_time, ball_time/2, colour, end, ready, 10))
   ball_count += 1;
+  objects_rendering.push(static_ball(now_s(), ball_time, "black", left_hand, 5 ));
+  objects_rendering.push(static_ball(now_s(), ball_time, "black", right_hand, 5 ));
 }, (ball_time * 500))
-objects_rendering.push(static_ball(now_s(), Number.POSITIVE_INFINITY, "black", left_hand, 5 ));
-objects_rendering.push(static_ball(now_s(), Number.POSITIVE_INFINITY, "black", right_hand, 5 ));
+*/
 
 function loop() {
 draw();
-setTimeout(loop, 1000/30);
+//setTimeout(loop, Math.random() * 250 + 100);
+setTimeout(loop, 10);
 }
 
 loop();
