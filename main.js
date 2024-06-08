@@ -198,7 +198,7 @@ setInterval(() => {
 
 
 let ball_count = 0; 
-let ball_time = 0.25;
+var ball_time = 0.5;
 
 let pull_in = 40
 let left_hand = {x:150, y:200}
@@ -214,102 +214,32 @@ canvas.onclick = function(e) {
     left_hand_i = {x:left_hand.x + pull_in, y:e.offsetY}
   }
 };
-/*
-// 1,5 Pattern
-setInterval(() => {
-  let colour = ball_colours[Math.floor((ball_count % 6) / 2)]
-  if (ball_count % 2 == 0) {
-    // 1 throw
-    console.log("1 throw");
-    objects_rendering.push(juggling_ball(right_hand, left_hand, ball_time, colour))
-  } else {
-    // 5 throw
-    console.log("5 throw");
-    objects_rendering.push(juggling_ball(left_hand, right_hand, ball_time * 5, colour))
-  }
-  ball_count += 1;
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", left_hand, 5 ));
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", right_hand, 5 ));
-}, (ball_time * 1000))
-*/
 
-/*
-// 1,5 Pattern
-setInterval(() => {
-  let colour = ball_colours[Math.floor((ball_count % 6) / 2)]
-  if (ball_count % 2 == 0) {
-    // 1 throw
-    console.log("1 throw");
-    objects_rendering.push(juggling_ball(right_hand, left_hand, ball_time, colour))
-  } else {
-    // 5 throw
-    console.log("5 throw");
-    objects_rendering.push(juggling_ball(left_hand, right_hand, ball_time * 5, colour))
-  }
-  ball_count += 1;
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", left_hand, 5 ));
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", right_hand, 5 ));
-}, (ball_time * 1000))
+var gravity_ctl = document.getElementById("gravity_ctl");
+gravity_ctl.oninput = function() {
+  gravity = this.value;
+}
+var ball_time_ctl = document.getElementById("ball_time_ctl");
+ball_time_ctl.oninput = function() {
+  console.log(ball_time)
+  ball_time = this.value;
+}
 
-// 3 Pattern
-setInterval(() => {
-
-  let colour = "red";
-  if (ball_count % 3 == 1) {
-    colour = "black";
-  }
-  if (ball_count % 3 == 2) {
-    colour = "blue";
-  }
-
-  start = left_hand_i
-  end = right_hand
-  ready = right_hand_i
-  if (ball_count % 2 == 1) {
-    start = right_hand_i
-    end = left_hand
-    ready = left_hand_i
-  }
-  console.log("Adding juggling ball");
-  objects_rendering.push(juggling_ball(start, end, ball_time, colour))
-  objects_rendering.push(linear_ball(now_s() + ball_time, ball_time/2, colour, end, ready, 10))
-  ball_count += 1;
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", left_hand, 5 ));
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", right_hand, 5 ));
-}, (ball_time * 500))
-*/
-/*
-// 5 Pattern
-setInterval(() => {
-
-  let colour = ball_colours[ball_count % 5];
-  start = left_hand_i
-  end = right_hand
-  ready = right_hand_i
-  if (ball_count % 2 == 1) {
-    start = right_hand_i
-    end = left_hand
-    ready = left_hand_i
-  }
-  console.log("Adding juggling ball");
-  objects_rendering.push(juggling_ball(start, end, ball_time * 5, colour))
-  objects_rendering.push(linear_ball(now_s() + ball_time * 5, ball_time/5, colour, end, ready, 10))
-  ball_count += 1;
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", left_hand, 5 ));
-  objects_rendering.push(static_ball(now_s(), ball_time, "black", right_hand, 5 ));
-}, (ball_time * 1000))
-*/
 let count = 0
-setInterval(() => {
-  count += 1;
+
+function pattern() {
   Pattern.pattern441(now_s(), ball_time, count, objects_rendering, right_hand, left_hand)
-}, ball_time * 1000)
+  count += 1
+  setTimeout(pattern, ball_time * 1000);
+}
+pattern();
+
 
 function loop() {
 draw();
 
 //setTimeout(loop, Math.random() * 250 + 100);
-setTimeout(loop, 30);
+setTimeout(loop, 10);
 }
 
 loop();

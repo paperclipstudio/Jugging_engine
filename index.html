@@ -3,7 +3,13 @@
      <title>Some dumb shit</title>
   </head>
   <body>
-    <h1>Title</h1>
+    <h1>Juggling Simulation</h1>
+    <div>
+      <label for="gravity_ctl">Gravity Control</label>
+      <input type="range" min="1" max="1000" value="500" id="gravity_ctl">
+      <label for="ball_time_ctl">Throw time</label>
+      <input type="range" min="0.1" max="1" value="1" id="ball_time_ctl", step="0.01">
+    </div>
   </body>
      <script src="main.js" type="module"></script>
 

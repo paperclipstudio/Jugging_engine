@@ -94,19 +94,19 @@ export function pattern441(start_time, ball_time, ball_count, render_queue, righ
   if (ball_count % 6 == 0 || ball_count % 6 == 4) {
     // 4 throw R
     render_queue.push(juggling_ball(right_hand_i, right_hand, start_time,               throw_time_4, colour))
-    render_queue.push(juggling_ball(right_hand, right_hand_i , start_time+ throw_time_4, hold_time,  colour))
+    render_queue.push(juggling_ball(right_hand, right_hand_i , start_time+ throw_time_4, hold_time,  colour, -1000))
   } else if (ball_count % 6 == 1 || ball_count % 6 == 3){
     // 4 throw L
     render_queue.push(juggling_ball(left_hand_i, left_hand, start_time, throw_time_4, colour))
-    render_queue.push(juggling_ball(left_hand, left_hand_i, start_time+ throw_time_4, hold_time, colour))
+    render_queue.push(juggling_ball(left_hand, left_hand_i, start_time+ throw_time_4, hold_time, colour, -1000))
   } else if (ball_count % 6 == 2) {
     // 1 throw R -> L
     render_queue.push(juggling_ball(right_hand_i, left_hand, start_time, throw_time_1, colour))
-    render_queue.push(juggling_ball(left_hand, left_hand_i, start_time+ throw_time_1, hold_time, colour))
+    render_queue.push(juggling_ball(left_hand, left_hand_i, start_time+ throw_time_1, hold_time, colour, -1000))
   } else if (ball_count % 6 == 5) {
     // 1 throw L -> R
     render_queue.push(juggling_ball(left_hand_i, right_hand, start_time, throw_time_1, colour))
-    render_queue.push(juggling_ball(right_hand, right_hand_i, start_time+ throw_time_1, hold_time, colour))
+    render_queue.push(juggling_ball(right_hand, right_hand_i, start_time+ throw_time_1, hold_time, colour, -1000))
   }
   if (ball_count % 2 == 0) {
     render_queue.push(juggling_ball(finger_i_r, finger_r, start_time, throw_time_2, "pink", -1000))
