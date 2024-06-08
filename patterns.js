@@ -50,7 +50,7 @@ export function pattern51(start_time, ball_time, ball_count, render_queue, right
 
 
 export function pattern3(start_time, ball_time, ball_count, render_queue, right_hand, left_hand) {
-  let colour = ball_colours[Math.floor(ball_count % 3)]
+  let colour = pattern_to_colour([3], ball_count)
   let left_hand_i = {x:left_hand.x + 40, y:left_hand.y}
   let right_hand_i = {x:right_hand.x - 40, y:right_hand.y}
   let start = left_hand_i
@@ -68,16 +68,34 @@ export function pattern3(start_time, ball_time, ball_count, render_queue, right_
   render_queue.push(juggling_ball(end  , ready, start_time + throw_time, hold_time, colour, -3000))
 }
 
+function add (acc, cur) {return acc + cur};
+
+function pattern_to_colour(pattern, ball) {
+  console.log(pattern.reduce(add,0), pattern.length);
+  var no_of_balls = pattern.reduce(add,0) / pattern.length;
+  console.log("Ball Count", no_of_balls);
+  var result = new Array(no_of_balls * pattern.length);
+  result.fill(-1);
+  var next_ball = 0;
+  for (let i = 0; i < result.length; i++) {
+    if (result[i] == -1) {
+      result[i] = next_ball;
+      next_ball += 1;
+    }
+
+    const current_throw = pattern[i % pattern.length];
+    const catch_time = i + current_throw;
+    if (catch_time < result.length) {
+      console.log(current_throw, catch_time, result[i])
+      result[catch_time] = result[i];
+    }
+  }
+  return result.map((c) => ball_colours[c])[ball % result.length];
+}
+
+
 export function pattern441(start_time, ball_time, ball_count, render_queue, right_hand, left_hand) { 
-  let colour = ball_colours[Math.floor((ball_count % 3))]
-  //LRLRLRLRLRLRLRLRLRLRLRLRL
-  //441441441441441441441441
-  //123312231123
-  //4   4   14   4   14   4
-  // 4   14   4   14   4   14
-  //  14   4   14   4   14   4
-  //012201120
-  colour = ball_colours[([0,1,2,2,0,1,1,2,0])[ball_count % 9]]
+  let colour = pattern_to_colour([4,4,1], ball_count)
   console.log(colour)
   const hold_ratio = 0.5
   const hold_time = (1-hold_ratio) * ball_time
@@ -118,7 +136,7 @@ export function pattern441(start_time, ball_time, ball_count, render_queue, righ
   ball_count += 1;
 }
 /*
-// 5 Pattern
+  // 5 Pattern
 setInterval(() => {
 
   let colour = ball_colours[ball_count % 5];
