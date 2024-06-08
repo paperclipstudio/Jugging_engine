@@ -302,7 +302,7 @@ setInterval(() => {
 let count = 0
 setInterval(() => {
   count += 1;
-  Pattern.pattern3(now_s(), ball_time, count, objects_rendering, right_hand, left_hand)
+  Pattern.pattern441(now_s(), ball_time, count, objects_rendering, right_hand, left_hand)
 }, ball_time * 1000)
 
 function loop() {
