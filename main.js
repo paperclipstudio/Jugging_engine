@@ -1,16 +1,15 @@
 import * as Pattern from "./patterns.js"
 
-const canvas = document.createElement("canvas");
+const canvas = document.getElementById("canvas");
 canvas.width = 800;
 canvas.height = 600;
 canvas.style.backgroundColor = "gray";
-document.body.append(canvas)
 const ctx = canvas.getContext("2d")
 
 ctx.fillStyle = "green"
 let date = new Date()
 let start_time = date.getTime();
-const G = 200;
+var gravity = 200;
 
 let objects_rendering = [];
 
@@ -133,7 +132,7 @@ function draw() {
     }
     return result
   });
-  if (objects_rendering.length > 250) {
+  if (objects_rendering.length > 1000) {
     console.log("Too many objects")
     console.log("Too many objects")
     console.log("Too many objects")
@@ -141,9 +140,18 @@ function draw() {
     objects_rendering = [];
     return;
   }
+/*
+  console.log(objects_rendering.map((f)=> {
+    if (f == noop) {
+      return '0'
+    } else {
+      return '*'
+    }
+
+  }).join(""));
+  */
   while (objects_rendering[0] == noop) {
     objects_rendering.shift();
-    break;
   }
 }
 
@@ -161,13 +169,6 @@ function randomColor() {
   return "#" + red + green + blue;
 }
 let life_time = 10;
-objects_rendering.push(bouncing_ball(now_s(), Number.POSITIVE_INFINITY, 
-  "blue", 
-  {x:25, y:25},
-  {x:15, y:30},
-  20,
-  0
-));
 
 function smoke_effect() {
   return bouncing_ball(now_s(), life_time, 
@@ -189,16 +190,8 @@ function juggling_ball(from, to, time, colour) {
   return falling_ball(now_s(), time, colour, from, {x:vx, y:vy}, 10);
 }
 
-/*
-objects_rendering.push(smoke_effect())
-setInterval(() => {
- objects_rendering.push(smoke_effect())
-}, 500)
-*/
-
-
 let ball_count = 0; 
-var ball_time = 0.5;
+var ball_time = 0.3
 
 let pull_in = 40
 let left_hand = {x:150, y:200}
@@ -224,11 +217,27 @@ ball_time_ctl.oninput = function() {
   console.log(ball_time)
   ball_time = this.value;
 }
+var frame_rate_ctl = document.getElementById("frame_rate_ctl");
+var frame_rate = 60;
+frame_rate_ctl.oninput = function() {
+  frame_rate = this.value;
+}
+
+var pattern_ctl = document.getElementById("pattern_ctl");
+var current_pattern = [3];
+const pattern_regex = new RegExp("^(?:\\d+,)*\\d+$");
+pattern_ctl.oninput = function() {
+  if (pattern_regex.test(this.value)) {
+    current_pattern = this.value.split(',').map((s) =>  parseInt(s, 10))
+  } else {
+    console.log("Failed regex on ", this.value);
+  }
+}
 
 let count = 0
 
 function pattern() {
-  Pattern.pattern441(now_s(), ball_time, count, objects_rendering, right_hand, left_hand)
+  Pattern.gen_pattern(current_pattern,now_s(), ball_time, count, objects_rendering, right_hand, left_hand, gravity)
   count += 1
   setTimeout(pattern, ball_time * 1000);
 }
@@ -239,7 +248,7 @@ function loop() {
 draw();
 
 //setTimeout(loop, Math.random() * 250 + 100);
-setTimeout(loop, 10);
+setTimeout(loop, 1000 / frame_rate);
 }
 
 loop();
