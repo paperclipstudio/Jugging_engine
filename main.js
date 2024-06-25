@@ -9,13 +9,16 @@ const ctx = canvas.getContext("2d")
 ctx.fillStyle = "green"
 let date = new Date()
 let start_time = date.getTime();
+start_time = 0;
 var gravity = 200;
 
 let objects_rendering = [];
 
+var now_offset = 0;
+var speed = 1;
 function now_ms() {
   let date = new Date()
-  return date.getTime() - start_time
+  return speed * date.getTime() + start_time;
 }
 
 function now_s() {
@@ -119,6 +122,7 @@ function linear_ball(start_time, length, colour, start, end, size) {
 
 
 function draw() {
+  console.log(now_ms());
   ctx.clearRect(0,0,800,600);
   const t = now_s();
   let to_remove = [];
@@ -212,6 +216,16 @@ var gravity_ctl = document.getElementById("gravity_ctl");
 gravity_ctl.oninput = function() {
   gravity = this.value;
 }
+
+var speed_ctl = document.getElementById("speed_ctl");
+speed_ctl.oninput = function() {
+  let date = new Date()
+  var real = date.getTime();
+  let now = now_ms();
+  speed = this.value;
+  start_time = now - speed * real;
+}
+
 var ball_time_ctl = document.getElementById("ball_time_ctl");
 ball_time_ctl.oninput = function() {
   console.log(ball_time)
@@ -242,7 +256,15 @@ function pattern() {
   setTimeout(pattern, ball_time * 1000);
 }
 pattern();
-
+setInterval(() => {
+  objects_rendering.push(Pattern.following_ball(
+    now_s(),
+    ball_time * 2,
+    "red",
+    5,
+    Pattern.lerp_hand(ball_time, {x:400,y:400},{x:450,y:410},now_s()
+    )));
+}, ball_time * 2000);
 
 function loop() {
 draw();

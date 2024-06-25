@@ -23,6 +23,54 @@ function falling_ball(start_time, length, colour, start, speed, size, G) {
   return render;
 }
 
+export function following_ball(start_time, length, colour, size, path) {
+  function render(t, ctx) {
+    const delta = t - start_time;
+    if (delta < 0) {
+      return true
+    }
+    if (delta > length) {
+      return false
+    }
+    const location = path(t);
+    let x  = location.x
+    let y = location.y
+    ctx.fillStyle = colour
+    ctx.strokeStyle = colour
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, 2 * Math.PI);
+    ctx.fill()
+    ctx.stroke()
+    return true
+  }
+  return render;
+}
+// (time) => (location) => (location) => (time => location)
+export function lerp_hand(ball_time, start, end, start_time) {
+  function hand(t) {
+    const delta = t - start_time
+    var progress = delta/ball_time
+    // 0 - ball_time start move to end
+    if (progress <= 1) {
+      return {
+        x:((1 - progress) * start.x + end.x * progress),
+        y:((1 - progress) * start.y + end.y * progress)
+      }
+    } else {
+      // ball_time -> 2 ball_time
+      progress -= 1;
+      return  {
+        x: (1 - progress) * end.x + start.x * progress,
+       y: (1 - progress) * end.y + start.y * progress
+       // x:end.x,
+       // y:end.y
+      }
+    }
+
+  }
+  return hand
+}
+
 export function juggling_ball(from, to, start_time, time, colour, G=1000) {
   let vx = (to.x - from.x) / time;
   let vy = ((to.y - from.y) / time) - (0.5 * G * time)
@@ -37,7 +85,7 @@ export function gen_pattern(
   render_queue, 
   right_hand, 
   left_hand,
-gravity) { 
+  gravity) { 
   let colour = pattern_to_colour(pattern, ball_count)
   const hold_ratio = 0.75;
   const hold_time = (1-hold_ratio) * ball_time
@@ -74,8 +122,8 @@ gravity) {
   let ready_low = {x:left_hand_i.x, y:left_hand_i.y + 10}
   let end_low = {x:left_hand.x, y:left_hand.y + 10}
   if (!is_left_hand_throw) {
-  ready_low = {x:right_hand_i.x, y:right_hand_i.y + 10}
-  end_low = {x:right_hand.x, y:right_hand.y + 10}
+    ready_low = {x:right_hand_i.x, y:right_hand_i.y + 10}
+    end_low = {x:right_hand.x, y:right_hand.y + 10}
   }
   if (current_throw != 2) {
     render_queue.push(juggling_ball(start, end, start_time, throw_time(current_throw), colour, gravity))
@@ -91,7 +139,6 @@ gravity) {
 function add (acc, cur) {return acc + cur};
 
 function pattern_to_colour(pattern, ball) {
-  console.log(pattern)
   var no_of_balls = pattern.reduce(add,0) / pattern.length;
   var result = new Array(no_of_balls * pattern.length * 2);
   result.fill(-1);
@@ -108,7 +155,6 @@ function pattern_to_colour(pattern, ball) {
       result[catch_time] = result[i];
     }
   }
-  console.log(result)
   return result.map((c) => {
     if (c % result.length > ball_colours.length) {
       return "white"
