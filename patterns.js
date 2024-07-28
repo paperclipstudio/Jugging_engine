@@ -23,6 +23,29 @@ function falling_ball(start_time, length, colour, start, speed, size, G) {
   return render;
 }
 
+
+export function static_ball(start_time, length, colour, size, position) {
+  function render(t, ctx) {
+    const delta = t - start_time;
+    if (delta < 0) {
+      return true
+    }
+    if (delta > length)  {
+      return false
+    }
+    let x = position.x
+    let y = position.y
+    ctx.fillStyle = colour
+    ctx.strokeStyle = colour
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, 2 * Math.PI);
+    ctx.fill()
+    ctx.stroke()
+    return true
+  }
+  return render;
+}
+
 export function following_ball(start_time, length, colour, size, path) {
   function render(t, ctx) {
     const delta = t - start_time;
@@ -69,6 +92,39 @@ export function lerp_hand(ball_time, start, end, start_time) {
 
   }
   return hand
+}
+
+// (time) => (location) => (location) => height => time => Path 
+export function ellipse(
+  ball_time, 
+  left,right,
+  height,
+  start_time) {
+  const width = Math.sqrt(Math.pow(left.x-right.x, 2) + Math.pow(left.y-right.y, 2))
+  const angle = Math.atan((left.y-right.y) / (left.x-right.x))
+  console.log("###" + Math.tan((left.y-right.y) / (left.x-right.x)))
+  const mid = {x : (left.x + right.x)/2, y : (left.y + right.y) / 2}
+
+return function funk(time) {
+  const delta = time - start_time
+  const progress = delta / ball_time
+  const progress_pi = progress * 2 * Math.PI
+  // make ellipse
+  const x = 0.5 * width * Math.cos(progress_pi)
+  const y = 0.5 * height * Math.sin(progress_pi)
+  // rotate
+  const x2 = x * Math.cos(angle) - y * Math.sin(angle)
+  const y2 = x * Math.sin(angle) + y * Math.cos(angle)
+  console.log(">>" + angle + " " + Math.pow(left.x - right.x, 2))
+  // translate
+
+  return { 
+    x : mid.x + x2,
+    y : mid.y + y2
+  }
+}
+
+
 }
 
 export function juggling_ball(from, to, start_time, time, colour, G=1000) {

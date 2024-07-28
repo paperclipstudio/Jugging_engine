@@ -266,6 +266,39 @@ setInterval(() => {
     )));
 }, ball_time * 2000);
 
+setInterval(() => {
+  objects_rendering.push(Pattern.following_ball(
+    now_s(),
+    ball_time * 2,
+    "red",
+    5,
+    Pattern.ellipse(ball_time, 
+      {x:200,y:200},{x:400,y:400},
+      282,
+      now_s()
+    )));
+}, ball_time * 2000);
+
+setInterval(() => {
+  objects_rendering.push(Pattern.static_ball(
+    now_s(),
+    ball_time * 2,
+    "blue",
+    2,
+    {x:200, y:200}
+    ));
+}, ball_time * 2000);
+
+setInterval(() => {
+  objects_rendering.push(Pattern.static_ball(
+    now_s(),
+    ball_time * 2,
+    "blue",
+    2,
+    {x:400, y:400}
+    ));
+}, ball_time * 2000);
+
 function loop() {
 draw();
 
