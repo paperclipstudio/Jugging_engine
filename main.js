@@ -9,7 +9,6 @@ const ctx = canvas.getContext("2d")
 ctx.fillStyle = "green"
 let date = new Date()
 let start_time = date.getTime();
-start_time = 0;
 var gravity = 200;
 
 let objects_rendering = [];
@@ -18,7 +17,7 @@ var now_offset = 0;
 var speed = 1;
 function now_ms() {
   let date = new Date()
-  return speed * date.getTime() + start_time;
+  return (speed * date.getTime()) - start_time;
 }
 
 function now_s() {
@@ -122,9 +121,10 @@ function linear_ball(start_time, length, colour, start, end, size) {
 
 
 function draw() {
-  console.log(now_ms());
   ctx.clearRect(0,0,800,600);
   const t = now_s();
+  //const t = 4
+  
   let to_remove = [];
   objects_rendering = objects_rendering.map((func) => {
     const result = func(t, ctx)
@@ -194,14 +194,22 @@ function juggling_ball(from, to, time, colour) {
   return falling_ball(now_s(), time, colour, from, {x:vx, y:vy}, 10);
 }
 
-let ball_count = 0; 
-var ball_time = 0.3
+var ball_count = 0; 
+var ball_time = 0.9
 
-let pull_in = 40
-let left_hand = {x:150, y:200}
-let left_hand_i = {x:left_hand.x + pull_in, y:200}
-let right_hand = {x:300, y:200}
-let right_hand_i = {x:right_hand.x - pull_in, y:200}
+// 3.1
+// ball_time * 3 + k == 3.1
+// k = 3.1 - 3bt
+// k = 3.1 - 2.7
+// k = 2.4 - 2
+// k = 2
+
+
+let pull_in = 40 
+let left_hand = {x:100, y:500}
+let left_hand_i = {x:left_hand.x + pull_in, y:500}
+let right_hand = {x:500, y:500}
+let right_hand_i = {x:right_hand.x - pull_in, y:500}
 canvas.onclick = function(e) {
   if (e.ctrlKey) {
     right_hand = {x:e.offsetX, y:e.offsetY}
@@ -224,11 +232,12 @@ speed_ctl.oninput = function() {
   let now = now_ms();
   speed = this.value;
   start_time = now - speed * real;
+  objects_rendering = []
 }
 
 var ball_time_ctl = document.getElementById("ball_time_ctl");
 ball_time_ctl.oninput = function() {
-  console.log(ball_time)
+  console.log("%%" + ball_time)
   ball_time = this.value;
 }
 var frame_rate_ctl = document.getElementById("frame_rate_ctl");
@@ -250,54 +259,19 @@ pattern_ctl.oninput = function() {
 
 let count = 0
 
-function pattern() {
-  Pattern.gen_pattern(current_pattern,now_s(), ball_time, count, objects_rendering, right_hand, left_hand, gravity)
+setInterval(() => {
+  Pattern.gen_pattern(current_pattern,
+    now_s(),
+    ball_time,
+    count,
+    objects_rendering,
+    right_hand,
+    left_hand,
+    gravity)
   count += 1
-  setTimeout(pattern, ball_time * 1000);
-}
-pattern();
-setInterval(() => {
-  objects_rendering.push(Pattern.following_ball(
-    now_s(),
-    ball_time * 2,
-    "red",
-    5,
-    Pattern.lerp_hand(ball_time, {x:400,y:400},{x:450,y:410},now_s()
-    )));
-}, ball_time * 2000);
+  console.log("&&", count, now_s())
+}, ball_time * 1000 / speed)
 
-setInterval(() => {
-  objects_rendering.push(Pattern.following_ball(
-    now_s(),
-    ball_time * 2,
-    "red",
-    5,
-    Pattern.ellipse(ball_time, 
-      {x:200,y:200},{x:400,y:400},
-      282,
-      now_s()
-    )));
-}, ball_time * 2000);
-
-setInterval(() => {
-  objects_rendering.push(Pattern.static_ball(
-    now_s(),
-    ball_time * 2,
-    "blue",
-    2,
-    {x:200, y:200}
-    ));
-}, ball_time * 2000);
-
-setInterval(() => {
-  objects_rendering.push(Pattern.static_ball(
-    now_s(),
-    ball_time * 2,
-    "blue",
-    2,
-    {x:400, y:400}
-    ));
-}, ball_time * 2000);
 
 function loop() {
 draw();

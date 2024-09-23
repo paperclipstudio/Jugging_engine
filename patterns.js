@@ -3,19 +3,26 @@ const ball_colours = ["red", "black", "blue", "green", "purple", "white", "cyan"
 
 function falling_ball(start_time, length, colour, start, speed, size, G) {
   function render(t, ctx) {
-    const delta = t - start_time;
+    let delta = t - start_time;
     if (delta < 0) {
       return true
     }
     if (delta > length) {
       return false
     }
-    let x  = start.x + delta * speed.x;
+    let x  = start.x + (delta * speed.x);
     let y = start.y + (speed.y * delta) + (0.5 * G * Math.pow(delta,2))
     ctx.fillStyle = colour
     ctx.strokeStyle = colour
     ctx.beginPath();
     ctx.arc(x, y, size, 0, 2 * Math.PI);
+    ctx.fill()
+    ctx.stroke()
+
+    ctx.fillStyle = "pink"
+    ctx.strokeStyle = "pink"
+    ctx.beginPath();
+    ctx.arc(start.x, start.y, size, 0, 2 * Math.PI);
     ctx.fill()
     ctx.stroke()
     return true
@@ -99,30 +106,42 @@ export function ellipse(
   ball_time, 
   left,right,
   height,
-  start_time) {
+  start_time,
+  clockwise) {
   const width = Math.sqrt(Math.pow(left.x-right.x, 2) + Math.pow(left.y-right.y, 2))
-  const angle = Math.atan((left.y-right.y) / (left.x-right.x))
-  console.log("###" + Math.tan((left.y-right.y) / (left.x-right.x)))
+  let angle = Math.atan((left.y-right.y) / (left.x-right.x))
   const mid = {x : (left.x + right.x)/2, y : (left.y + right.y) / 2}
 
-return function funk(time) {
-  const delta = time - start_time
-  const progress = delta / ball_time
-  const progress_pi = progress * 2 * Math.PI
-  // make ellipse
-  const x = 0.5 * width * Math.cos(progress_pi)
-  const y = 0.5 * height * Math.sin(progress_pi)
-  // rotate
-  const x2 = x * Math.cos(angle) - y * Math.sin(angle)
-  const y2 = x * Math.sin(angle) + y * Math.cos(angle)
-  console.log(">>" + angle + " " + Math.pow(left.x - right.x, 2))
-  // translate
+  return function funk(time) {
+    const delta = time - start_time
+    const progress = delta / ball_time
+    let progress_pi = progress * Math.PI
+    if (left.x > right.x) {
+      progress_pi += Math.PI
+    }
+    if (!clockwise) {
+      progress_pi = 0 - progress_pi
+    }
+    /*
+    if (left.x > right.x) {
+      angle += Math.PI;
+    }
+    */
 
-  return { 
-    x : mid.x + x2,
-    y : mid.y + y2
+    // make ellipse
+    const x = 0.5 * width * Math.cos(progress_pi)
+    const y = 0.5 * height * Math.sin(progress_pi)
+    // rotate
+    const x2 = x * Math.cos(angle) - y * Math.sin(angle)
+    const y2 = x * Math.sin(angle) + y * Math.cos(angle)
+    console.log(">>" + angle + " " + Math.pow(left.x - right.x, 2))
+    // translate
+
+    return { 
+      x : mid.x + x2,
+      y : mid.y + y2
+    }
   }
-}
 
 
 }
@@ -133,6 +152,8 @@ export function juggling_ball(from, to, start_time, time, colour, G=1000) {
   return falling_ball(start_time, time, colour, from, {x:vx, y:vy}, 10, G);
 }
 
+let is_first = true;
+
 export function gen_pattern(
   pattern, 
   start_time, 
@@ -142,53 +163,123 @@ export function gen_pattern(
   right_hand, 
   left_hand,
   gravity) { 
+  const hold_time = 0.5 * ball_time
+  let left_hand_throw_time = 0
+  let left_hand_catch_time = left_hand_throw_time + hold_time
+  let right_hand_throw_time = left_hand_throw_time + ball_time
+  let right_hand_catch_time = left_hand_catch_time + ball_time
   let colour = pattern_to_colour(pattern, ball_count)
-  const hold_ratio = 0.75;
-  const hold_time = (1-hold_ratio) * ball_time
-  function throw_time(n) {return ball_time * n - hold_time}
-  const mirrors = pattern.length % 2 == 1
+  //function throw_time(n) {return ball_time * (n - hold_time)}
+  function throw_time(n) {return (ball_time * n) - hold_time}
   const is_left_hand_throw = ball_count % 2 == 0
   const current_throw = pattern[ball_count % pattern.length]
-  let left_hand_i = {x:left_hand.x + 40, y:left_hand.y}
-  let right_hand_i = {x:right_hand.x - 40, y:right_hand.y}
-  let start
-  let end
-  let ready
-  if (current_throw % 2 == 0) {
-    if (is_left_hand_throw) {
-      start = left_hand_i
-      end = left_hand
-      ready = left_hand_i
-    } else {
-      start = right_hand_i
-      end = right_hand
-      ready = right_hand_i
-    }
-  }else {
-    if (is_left_hand_throw) {
-      start = left_hand_i
-      end = right_hand
-      ready = right_hand_i
-    } else {
-      start = right_hand_i
-      end = left_hand
-      ready = left_hand_i
-    }
+  let left_hand_i = {x:left_hand.x + 90, y:left_hand.y - 90}
+  let right_hand_i = {x:right_hand.x - 90, y:right_hand.y - 90}
+
+  //
+  let left_hand_path = ellipse(ball_time, left_hand, left_hand_i, 50, start_time, false)
+  let righ_hand_path = ellipse(ball_time, right_hand, right_hand_i, 50, start_time + ball_time, true)
+  //
+  const left_hand_throw = left_hand_path(start_time + ball_time * left_hand_throw_time)
+  const right_hand_catch = righ_hand_path(start_time + ball_time * right_hand_catch_time)
+  const right_hand_throw = righ_hand_path(start_time + ball_time * right_hand_throw_time)
+  const left_hand_catch = left_hand_path(start_time + ball_time * left_hand_catch_time)
+  //
+  if (is_first) {
+  render_queue.push(following_ball(0, Math.MAX, "yellow", 10, left_hand_path))
+  render_queue.push(following_ball(0, Math.MAX, "yellow", 10, righ_hand_path));
+  render_queue.push(static_ball(0, Math.MAX, "yellow", 10, right_hand_catch));
+  render_queue.push(static_ball(0, Math.MAX, "yellow", 10, left_hand_throw));
+    is_first = false;
   }
-  let ready_low = {x:left_hand_i.x, y:left_hand_i.y + 10}
-  let end_low = {x:left_hand.x, y:left_hand.y + 10}
-  if (!is_left_hand_throw) {
-    ready_low = {x:right_hand_i.x, y:right_hand_i.y + 10}
-    end_low = {x:right_hand.x, y:right_hand.y + 10}
-  }
-  if (current_throw != 2) {
-    render_queue.push(juggling_ball(start, end, start_time, throw_time(current_throw), colour, gravity))
+  if (current_throw == 0) {
+    // No ball in hand
+  } else if (current_throw == 2) {
+    // Hold ball
+  } else if (current_throw % 2 == 0) {
+    // Same hand
+    if (is_left_hand_throw) {
+      render_queue.push(
+        juggling_ball(
+          left_hand_throw, 
+          left_hand_catch, 
+          start_time - left_hand_throw_time * ball_time, 
+          throw_time(current_throw), 
+          colour, 
+          gravity
+        )
+      )
+    } else {
+      render_queue.push(
+        juggling_ball(
+          left_hand_throw, 
+          left_hand_catch, 
+          start_time - left_hand_throw_time * ball_time, 
+          throw_time(current_throw), 
+          colour, 
+          gravity
+        )
+      )
+      render_queue.push(juggling_ball(right_hand_throw, right_hand_catch, start_time, throw_time(current_throw), colour, gravity))
+    }
   } else {
-    render_queue.push(juggling_ball(start, end, start_time, throw_time(current_throw), colour, -gravity))
+    // Odd throw
+    if (is_left_hand_throw) {
+      render_queue.push(
+        juggling_ball(
+          left_hand_throw,
+          right_hand_catch,
+          start_time + (ball_time * left_hand_throw_time * 2),
+          //start_time + (ball_time * 0.2),
+          throw_time(current_throw),
+          colour,
+          gravity))
+    } else {
+      render_queue.push(
+        juggling_ball(right_hand_throw,
+          left_hand_catch,
+          start_time,
+          throw_time(current_throw),
+          colour,
+          gravity))
+    }
   }
-  render_queue.push(juggling_ball(end, ready, start_time+ throw_time(current_throw), hold_time, colour, -gravity))
-  render_queue.push(juggling_ball(ready_low, end_low, start_time, throw_time(2), "pink", -gravity))
-  render_queue.push(juggling_ball(end_low, ready_low, start_time+ throw_time(2), hold_time, "pink", -gravity))
+  //render_queue.push(ellipse_hand(start_time, hold_time, "green", end, ready, 10))
+  //render_queue.push(juggling_ball(ready_low, end_low, start_time, throw_time(2), "pink", -gravity))
+  // Ball in air
+  if (!is_left_hand_throw) {
+    //render_queue.push(ellipse_hand(start_time + throw_time(1)                , hold_time, "green", ready, end, 10))
+    //render_queue.push(ellipse_hand(start_time + throw_time(1) + hold_time, throw_time(2)    , "green", end, ready, 10))
+  } else { 
+    //render_queue.push(ellipse_hand(start_time                , throw_time(2), "blue", start, ready, 10, false))
+    // render_queue.push(ellipse_hand(start_time + throw_time(2), hold_time    , "green", ready, end, 10, false))
+  }
+  //render_queue.push(juggling_ball(end_low, ready_low, start_time+ throw_time(2), hold_time, "pink", -gravity))
+}
+
+function ellipse_hand(start_time, length, colour, start, end, size, clockwise = true) {
+  console.log("ellipse_hand")
+  function render(t, ctx) {
+    const delta = t - start_time;
+    if (delta < 0) {
+      return true
+    }
+    if (delta > length) {
+      console.log("ellipse_hand render done")
+      return false
+    }
+    let pos = ellipse(length, start, end, 20, start_time, clockwise)(t)
+
+    console.log("ellipse_hand render" + pos.x + " " + pos.y + colour)
+    ctx.fillStyle = colour
+    ctx.strokeStyle = colour
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, size, 0, 2 * Math.PI);
+    ctx.fill()
+    ctx.stroke()
+    return true
+  }
+  return render;
 }
 
 
