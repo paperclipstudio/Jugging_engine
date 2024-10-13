@@ -1,4 +1,5 @@
 import * as Pattern from "./patterns.js"
+import * as Path from "./path.js"
 
 const canvas = document.getElementById("canvas");
 canvas.width = 800;
@@ -330,19 +331,19 @@ let r_catch = Pattern.static_blueprint(
   right_hand
 );
 
-let l_catch = Pattern.shift_path(
-  Pattern.mirror_path(r_catch, 300),
+let l_catch = Path.offset(
+  Path.mirror(r_catch, 300),
   3);
 
-let r_throw = Pattern.shift_path(
-  Pattern.mirror_path(l_throw, 300),
+let r_throw = Path.offset(
+  Path.mirror(l_throw, 300),
   3)
 console.log(r_throw)
 
 
 
-let one_cycle = Pattern.join_paths(l_throw, r_catch, r_throw, l_catch);
-let looping = Pattern.loop_path(one_cycle, 6);
+let one_cycle = Path.join(l_throw, r_catch, r_throw, l_catch);
+let looping = Path.loop(one_cycle, 6);
 
 objects_rendering.push(
   Pattern.basic_renderer(
@@ -354,7 +355,7 @@ objects_rendering.push(
 
 objects_rendering.push(
   Pattern.basic_renderer(
-    Pattern.shift_path(looping, 2),
+    Path.offset(looping, 2),
     "blue",
     10
   )
@@ -362,7 +363,7 @@ objects_rendering.push(
 
 objects_rendering.push(
   Pattern.basic_renderer(
-    Pattern.shift_path(looping, 4),
+    Path.offset(looping, 4),
     "red",
     10
   )

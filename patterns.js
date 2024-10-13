@@ -208,58 +208,6 @@ export function static_blueprint(start_time, length, start) {
 
 // (path, length, path) -> (path)
 // Takes two paths and joins one on the end of the other
-export function join_path(path1, path2) {
-  function path(t) {
-    if (path1(t) !== false) {
-      return path1(t)
-    } else {
-      return path2(t);
-    }
-  }
-  return path;
-}
-
-export function join_paths(...paths) {
-  return (t) => {
-    for (let i = 0; i < paths.length; i++) {
-      if (paths[i](t) !== false) {
-        return paths[i](t)
-      }
-    }
-    return false
-  }
-}
-
-export function loop_path(path, length) {
-  return (t) => {
-    let offset = 0;
-    while (path(t - offset) === false) {
-      offset += length; 
-    }
-    return path(t - offset);
-  }
-}
-
-export function shift_path(path, offset) {
-  return (t) => {
-    return path(t - offset);
-  }
-}
-
-export function mirror_path(path, x_line) {
-  function mirrored_path(t) {
-    let location = path(t)
-    if (location === true || location === false) {
-      return location
-    }
-    console.log("From:", location.x, " To:", ( 2* x_line) - location.x)
-    return {
-      x: ( 2* x_line) - location.x,
-      y: location.y
-    }
-  }
-  return mirrored_path;
-}
 
 
 export function juggling_ball_blueprint(from, to, start_time, fly_time, G=500) {
