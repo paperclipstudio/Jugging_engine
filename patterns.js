@@ -134,16 +134,119 @@ export function ellipse(
     // rotate
     const x2 = x * Math.cos(angle) - y * Math.sin(angle)
     const y2 = x * Math.sin(angle) + y * Math.cos(angle)
-    console.log(">>" + angle + " " + Math.pow(left.x - right.x, 2))
-    // translate
+    console.log(">>" + angle + " " + Math.pow(left.x - right.x, 2)) // translate
 
     return { 
       x : mid.x + x2,
       y : mid.y + y2
     }
   }
+}
 
+// Blueprint
+// These are functions that take create a path.
 
+// Path is a pure function that takes a time and returns one of three
+// things
+// Location: if time is a valid time
+// False: if the time if after the path
+// True: if the time is before
+
+// Location is a 2D location
+
+// Render takes Path and renders to a 2D Contex
+// Then returns true if it should be called again in the future
+ 
+
+export function basic_renderer(path, colour, size) {
+  function render(t, ctx) {
+    let current = path(t);
+    if (current == true || current == false) {
+      console.log("BAISC OUT OF RANGE", t)
+      return current;
+    }
+      console.log("in range", current.x, current.y);
+    ctx.fillStyle = colour
+    ctx.strokeStyle = colour
+    ctx.beginPath();
+    ctx.arc(current.x, current.y, size, 0, 2 * Math.PI);
+    ctx.fill()
+    ctx.stroke()
+    return true
+  }
+  return render;
+}
+
+export function falling_ball_blueprint(start_time, length, start, speed, G) {
+  function path(t) {
+    let delta = t - start_time;
+    if (delta < 0) {
+      return true
+    }
+    if (delta > length) {
+      return false
+    }
+    return {
+      x: start.x + (delta * speed.x),
+      y: start.y + (speed.y * delta) + (0.5 * G * Math.pow(delta,2))
+    }
+  }
+  return path;
+}
+
+export function static_blueprint(start_time, length, start) {
+  function path(t) {
+    let delta = t - start_time;
+    if (delta < 0) {
+      return true
+    }
+    if (delta > length) {
+      return false
+    }
+    return start;
+  }
+  return path;
+}
+
+// (path, length, path) -> (path)
+// Takes two paths and joins one on the end of the other
+export function join_path(path1, path2) {
+  function path(t) {
+    if (path1(t) !== false) {
+      return path1(t)
+    } else {
+      return path2(t);
+    }
+  }
+  return path;
+}
+
+export function join_paths(...paths) {
+  return (t) => {
+    for (let i = 0; i < paths.length; i++) {
+      if (paths[i](t) !== false) {
+        return paths[i](t)
+      }
+    }
+    return false
+  }
+}
+
+export function loop_path(path, length) {
+  return (t) => {
+    let offset = 0;
+    while (path(t - offset) === false) {
+      offset += length; 
+    }
+    return path(t - offset);
+  }
+}
+
+export function juggling_ball_blueprint(from, to, start_time, fly_time, G=500) {
+  let vx = (to.x - from.x) / fly_time;
+  let vy = ((to.y - from.y) / fly_time) - (0.5 * G * fly_time)
+  console.log("|||", vy);
+  return falling_ball_blueprint(start_time, fly_time, from, {x:vx, y:vy}, G);
 }
 
 export function juggling_ball(from, to, start_time, time, colour, G=1000) {
@@ -186,10 +289,10 @@ export function gen_pattern(
   const left_hand_catch = left_hand_path(start_time + ball_time * left_hand_catch_time)
   //
   if (is_first) {
-  render_queue.push(following_ball(0, Math.MAX, "yellow", 10, left_hand_path))
-  render_queue.push(following_ball(0, Math.MAX, "yellow", 10, righ_hand_path));
-  render_queue.push(static_ball(0, Math.MAX, "yellow", 10, right_hand_catch));
-  render_queue.push(static_ball(0, Math.MAX, "yellow", 10, left_hand_throw));
+    render_queue.push(following_ball(0, Math.MAX, "yellow", 10, left_hand_path))
+    render_queue.push(following_ball(0, Math.MAX, "yellow", 10, righ_hand_path));
+    render_queue.push(static_ball(0, Math.MAX, "yellow", 10, right_hand_catch));
+    render_queue.push(static_ball(0, Math.MAX, "yellow", 10, left_hand_throw));
     is_first = false;
   }
   if (current_throw == 0) {

@@ -119,7 +119,7 @@ function linear_ball(start_time, length, colour, start, end, size) {
   return render;
 }
 
-linear_blueprint(colour, start, end, size) {
+function linear_blueprint(colour, start, end, size) {
   function blueprint(start_time, length) {
     function render(t) {
       const delta = t - start_time;
@@ -145,41 +145,15 @@ linear_blueprint(colour, start, end, size) {
   return blueprint;
 }
 
-function join_paths(path1, length, path2, length) {
-  function path(t) {
-    
-  }
-  
-}
-
-function join(first_path_blueprint, second_path_blueprint, ratio=0.5) {
-  function blueprint(start_time, length) => {
-    let first_length = length * ratio;
-    let second_start = start_time * first_length;
-    const first_path = first_path_blueprint(start_time, first_length);
-    const second_path = second_path_blueprint(second_start, length * (1-ratio));
-    function render(t) { 
-      const delta = t - start_time;
-      if (delta < 0) {
-        return true
-      }
-      if (delta < second_start) {
-        return first_path(t)
-      }
-    }
-
-  }
-  
-}
-
 
 function draw() {
   ctx.clearRect(0,0,800,600);
   const t = now_s();
   //const t = 4
-  
+
   let to_remove = [];
   objects_rendering = objects_rendering.map((func) => {
+    console.log(">>>", func);
     const result = func(t, ctx)
     if (result === true) {
       return func
@@ -197,7 +171,7 @@ function draw() {
     objects_rendering = [];
     return;
   }
-/*
+  /*
   console.log(objects_rendering.map((f)=> {
     if (f == noop) {
       return '0'
@@ -312,16 +286,101 @@ pattern_ctl.oninput = function() {
 
 let count = 0
 for (let i=0; i < 3; i++) {
-Pattern.gen_pattern(current_pattern,
-  ball_time * i, // Start time
-  ball_time,
-  i,  // Throw count
-  objects_rendering,
-  right_hand,
-  left_hand,
-  gravity);
+  Pattern.gen_pattern(current_pattern,
+    ball_time * i, // Start time
+    ball_time,
+    i,  // Throw count
+    objects_rendering,
+    right_hand,
+    left_hand,
+    gravity);
 }
 
+objects_rendering.push(
+  Pattern.basic_renderer(
+    Pattern.static_blueprint(
+      now_s(),
+      100,
+      left_hand
+    ),
+    "green",
+    15
+  )
+)
+
+objects_rendering.push(
+  Pattern.basic_renderer(
+    Pattern.static_blueprint(
+      now_s(),
+      100,
+      right_hand
+    ),
+    "green",
+    15
+  )
+)
+
+let l_throw = Pattern.juggling_ball_blueprint(
+  left_hand, 
+  right_hand, 
+  now_s(),
+  2
+);
+
+let r_catch = Pattern.static_blueprint(
+  now_s() + 2,
+  1,
+  right_hand
+);
+
+let r_throw = Pattern.juggling_ball_blueprint(
+  right_hand, 
+  left_hand, 
+  now_s() + 3,
+  2
+);
+
+let l_catch = Pattern.static_blueprint(
+  now_s() + 5,
+  1,
+  left_hand
+);
+
+
+let one_cycle = Pattern.join_paths(l_throw, r_catch, r_throw, l_catch);
+let looping = Pattern.loop_path(one_cycle, 6);
+objects_rendering.push(
+  Pattern.basic_renderer(
+    looping,
+    "orange",
+    10
+  )
+)
+
+objects_rendering.push(
+  Pattern.basic_renderer(
+    Pattern.juggling_ball_blueprint(
+      right_hand, 
+      left_hand, 
+      now_s() + 3,
+      2
+    ),
+    "orange",
+    10
+  )
+)
+
+objects_rendering.push(
+  Pattern.basic_renderer(
+    Pattern.static_blueprint(
+      now_s() + 5,
+      1,
+      left_hand
+    ),
+    "orange",
+    10
+  )
+)
 
 function loop() {
   draw();
