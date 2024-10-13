@@ -58,7 +58,6 @@ function bouncing_ball(start_time, length, colour, start, speed, size, shrink) {
     ctx.stroke()
 
     if (y > floor) {
-      console.log("bounce")
       return bouncing_ball(now_s(), length - delta, 
         //randomColor(),
         colour, 
@@ -153,7 +152,6 @@ function draw() {
 
   let to_remove = [];
   objects_rendering = objects_rendering.map((func) => {
-    console.log(">>>", func);
     const result = func(t, ctx)
     if (result === true) {
       return func
@@ -264,7 +262,6 @@ speed_ctl.oninput = function() {
 
 var ball_time_ctl = document.getElementById("ball_time_ctl");
 ball_time_ctl.oninput = function() {
-  console.log("%%" + ball_time)
   ball_time = this.value;
 }
 var frame_rate_ctl = document.getElementById("frame_rate_ctl");
@@ -283,7 +280,7 @@ pattern_ctl.oninput = function() {
     console.log("Failed regex on ", this.value);
   }
 }
-
+/*
 let count = 0
 for (let i=0; i < 3; i++) {
   Pattern.gen_pattern(current_pattern,
@@ -295,7 +292,7 @@ for (let i=0; i < 3; i++) {
     left_hand,
     gravity);
 }
-
+*/
 objects_rendering.push(
   Pattern.basic_renderer(
     Pattern.static_blueprint(
@@ -304,7 +301,7 @@ objects_rendering.push(
       left_hand
     ),
     "green",
-    15
+    12
   )
 )
 
@@ -316,39 +313,37 @@ objects_rendering.push(
       right_hand
     ),
     "green",
-    15
+    12
   )
 )
 
 let l_throw = Pattern.juggling_ball_blueprint(
   left_hand, 
   right_hand, 
-  now_s(),
+  0,
   2
 );
 
 let r_catch = Pattern.static_blueprint(
-  now_s() + 2,
+  2,
   1,
   right_hand
 );
 
-let r_throw = Pattern.juggling_ball_blueprint(
-  right_hand, 
-  left_hand, 
-  now_s() + 3,
-  2
-);
+let l_catch = Pattern.shift_path(
+  Pattern.mirror_path(r_catch, 300),
+  3);
 
-let l_catch = Pattern.static_blueprint(
-  now_s() + 5,
-  1,
-  left_hand
-);
+let r_throw = Pattern.shift_path(
+  Pattern.mirror_path(l_throw, 300),
+  3)
+console.log(r_throw)
+
 
 
 let one_cycle = Pattern.join_paths(l_throw, r_catch, r_throw, l_catch);
 let looping = Pattern.loop_path(one_cycle, 6);
+
 objects_rendering.push(
   Pattern.basic_renderer(
     looping,
@@ -359,32 +354,22 @@ objects_rendering.push(
 
 objects_rendering.push(
   Pattern.basic_renderer(
-    Pattern.juggling_ball_blueprint(
-      right_hand, 
-      left_hand, 
-      now_s() + 3,
-      2
-    ),
-    "orange",
+    Pattern.shift_path(looping, 2),
+    "blue",
     10
   )
 )
 
 objects_rendering.push(
   Pattern.basic_renderer(
-    Pattern.static_blueprint(
-      now_s() + 5,
-      1,
-      left_hand
-    ),
-    "orange",
+    Pattern.shift_path(looping, 4),
+    "red",
     10
   )
 )
 
 function loop() {
   draw();
-
   //setTimeout(loop, Math.random() * 250 + 100);
   setTimeout(loop, 1000 / frame_rate);
 }

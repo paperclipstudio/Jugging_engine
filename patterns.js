@@ -162,10 +162,8 @@ export function basic_renderer(path, colour, size) {
   function render(t, ctx) {
     let current = path(t);
     if (current == true || current == false) {
-      console.log("BAISC OUT OF RANGE", t)
       return current;
     }
-      console.log("in range", current.x, current.y);
     ctx.fillStyle = colour
     ctx.strokeStyle = colour
     ctx.beginPath();
@@ -242,10 +240,31 @@ export function loop_path(path, length) {
   }
 }
 
+export function shift_path(path, offset) {
+  return (t) => {
+    return path(t - offset);
+  }
+}
+
+export function mirror_path(path, x_line) {
+  function mirrored_path(t) {
+    let location = path(t)
+    if (location === true || location === false) {
+      return location
+    }
+    console.log("From:", location.x, " To:", ( 2* x_line) - location.x)
+    return {
+      x: ( 2* x_line) - location.x,
+      y: location.y
+    }
+  }
+  return mirrored_path;
+}
+
+
 export function juggling_ball_blueprint(from, to, start_time, fly_time, G=500) {
   let vx = (to.x - from.x) / fly_time;
   let vy = ((to.y - from.y) / fly_time) - (0.5 * G * fly_time)
-  console.log("|||", vy);
   return falling_ball_blueprint(start_time, fly_time, from, {x:vx, y:vy}, G);
 }
 
