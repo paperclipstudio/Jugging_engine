@@ -1,5 +1,5 @@
 import * as Pattern from "./patterns.js"
-import * as Path from "./path.js"
+import Path from "./path.js"
 
 const canvas = document.getElementById("canvas");
 canvas.width = 800;
@@ -318,36 +318,30 @@ objects_rendering.push(
   )
 )
 
-let l_throw = Pattern.juggling_ball_blueprint(
+let l_throw = new Path(Pattern.juggling_ball_blueprint(
   left_hand, 
   right_hand, 
   0,
   2
-);
+), "L throw");
 
-let r_catch = Pattern.static_blueprint(
+let r_catch = new Path(Pattern.static_blueprint(
   2,
   1,
   right_hand
-);
+), "R catch");
 
-let l_catch = Path.offset(
-  Path.mirror(r_catch, 300),
-  3);
-
-let r_throw = Path.offset(
-  Path.mirror(l_throw, 300),
-  3)
-console.log(r_throw)
+let l_catch = r_catch.mirror(300).offset(3);
+let r_throw = l_throw.offset(3).mirror(300);
 
 
 
-let one_cycle = Path.join(l_throw, r_catch, r_throw, l_catch);
-let looping = Path.loop(one_cycle, 6);
+let looping = l_throw.join(r_catch, r_throw, l_catch).loop(6);
+console.log("Looping:", looping.name)
 
 objects_rendering.push(
   Pattern.basic_renderer(
-    looping,
+    looping.path,
     "orange",
     10
   )
@@ -355,7 +349,7 @@ objects_rendering.push(
 
 objects_rendering.push(
   Pattern.basic_renderer(
-    Path.offset(looping, 2),
+    r_catch.offset(-2).join(looping.mirror(300).offset(1)).path,
     "blue",
     10
   )
@@ -363,7 +357,7 @@ objects_rendering.push(
 
 objects_rendering.push(
   Pattern.basic_renderer(
-    Path.offset(looping, 4),
+    l_catch.offset(-5).join(l_catch.offset(-4), looping.offset(2)).path,
     "red",
     10
   )
