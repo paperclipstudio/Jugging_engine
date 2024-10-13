@@ -1,5 +1,6 @@
 import * as Pattern from "./patterns.js"
 import Path from "./path.js"
+import basic_juggle from "./basic_juggle.js"
 
 const canvas = document.getElementById("canvas");
 canvas.width = 800;
@@ -283,87 +284,6 @@ pattern_ctl.oninput = function() {
   } else {
     console.log("Failed regex on ", this.value);
   }
-}
-
-function basic_juggle(render_queue, left_hand, right_hand, gravity) {
-  render_queue.push(
-    Pattern.basic_renderer(
-      Pattern.static_blueprint(
-        now_s(),
-        100,
-        left_hand
-      ),
-      "green",
-      12
-    )
-  )
-
-  render_queue.push(
-    Pattern.basic_renderer(
-      Pattern.static_blueprint(
-        now_s(),
-        100,
-        right_hand
-      ),
-      "green",
-      12
-    )
-  )
-
-  let l_throw = new Path(Pattern.juggling_ball_blueprint(
-    left_hand, 
-    right_hand, 
-    0,
-    2
-  ), "L throw");
-
-  let r_catch = new Path(Pattern.static_blueprint(
-    2,
-    1,
-    right_hand
-  ), "R catch");
-
-  let l_catch = new Path(Pattern.static_blueprint(
-    5,
-    1,
-    left_hand
-  ), "L catch");
-
-  let r_throw = new Path(Pattern.juggling_ball_blueprint(
-    right_hand, 
-    left_hand, 
-    3,
-    2
-  ), "R throw");
-
-
-
-  let looping = l_throw.join(r_catch, r_throw, l_catch).loop(6);
-  console.log("Looping:", looping.name)
-
-  render_queue.push(
-    Pattern.basic_renderer(
-      looping.path,
-      "orange",
-      10
-    )
-  )
-
-  render_queue.push(
-    Pattern.basic_renderer(
-      r_catch.join(r_throw,l_catch,l_throw.offset(6)).offset(-2).loop(6).path,
-      "blue",
-      10
-    )
-  )
-
-  render_queue.push(
-    Pattern.basic_renderer(
-      l_catch.offset(-5).join(l_catch.offset(-4), looping.offset(2)).path,
-      "red",
-      10
-    )
-  )
 }
 
 basic_juggle(objects_rendering, left_hand, right_hand, gravity);

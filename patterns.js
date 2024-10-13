@@ -181,7 +181,6 @@ export function trail_renderer(path, colour="black", size=1) {
   return render;
 }
 
-
 export function basic_renderer(path, colour, size) {
   function render(t, ctx) {
     let current = path(t);
