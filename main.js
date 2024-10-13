@@ -236,7 +236,8 @@ let left_hand = {x:100, y:500}
 let left_hand_i = {x:left_hand.x + pull_in, y:500}
 let right_hand = {x:500, y:500}
 let right_hand_i = {x:right_hand.x - pull_in, y:500}
-canvas.onclick = function(e) {
+
+canvas.onmousemove = function(e) {
   if (e.ctrlKey) {
     right_hand = {x:e.offsetX, y:e.offsetY}
     right_hand_i = {x:right_hand.x - pull_in, y:e.offsetY}
@@ -244,6 +245,8 @@ canvas.onclick = function(e) {
     left_hand = {x:e.offsetX, y:e.offsetY}
     left_hand_i = {x:left_hand.x + pull_in, y:e.offsetY}
   }
+  objects_rendering = [];
+  basic_juggle(objects_rendering, left_hand, right_hand, gravity);
 };
 
 var gravity_ctl = document.getElementById("gravity_ctl");
@@ -281,74 +284,89 @@ pattern_ctl.oninput = function() {
     console.log("Failed regex on ", this.value);
   }
 }
-objects_rendering.push(
-  Pattern.basic_renderer(
-    Pattern.static_blueprint(
-      now_s(),
-      100,
-      left_hand
-    ),
-    "green",
-    12
+
+function basic_juggle(render_queue, left_hand, right_hand, gravity) {
+  render_queue.push(
+    Pattern.basic_renderer(
+      Pattern.static_blueprint(
+        now_s(),
+        100,
+        left_hand
+      ),
+      "green",
+      12
+    )
   )
-)
 
-objects_rendering.push(
-  Pattern.basic_renderer(
-    Pattern.static_blueprint(
-      now_s(),
-      100,
-      right_hand
-    ),
-    "green",
-    12
+  render_queue.push(
+    Pattern.basic_renderer(
+      Pattern.static_blueprint(
+        now_s(),
+        100,
+        right_hand
+      ),
+      "green",
+      12
+    )
   )
-)
 
-let l_throw = new Path(Pattern.juggling_ball_blueprint(
-  left_hand, 
-  right_hand, 
-  0,
-  2
-), "L throw");
+  let l_throw = new Path(Pattern.juggling_ball_blueprint(
+    left_hand, 
+    right_hand, 
+    0,
+    2
+  ), "L throw");
 
-let r_catch = new Path(Pattern.static_blueprint(
-  2,
-  1,
-  right_hand
-), "R catch");
+  let r_catch = new Path(Pattern.static_blueprint(
+    2,
+    1,
+    right_hand
+  ), "R catch");
 
-let l_catch = r_catch.mirror(300).offset(3);
-let r_throw = l_throw.offset(3).mirror(300);
+  let l_catch = new Path(Pattern.static_blueprint(
+    5,
+    1,
+    left_hand
+  ), "L catch");
+
+  let r_throw = new Path(Pattern.juggling_ball_blueprint(
+    right_hand, 
+    left_hand, 
+    3,
+    2
+  ), "R throw");
 
 
 
-let looping = l_throw.join(r_catch, r_throw, l_catch).loop(6);
-console.log("Looping:", looping.name)
+  let looping = l_throw.join(r_catch, r_throw, l_catch).loop(6);
+  console.log("Looping:", looping.name)
 
-objects_rendering.push(
-  Pattern.basic_renderer(
-    looping.path,
-    "orange",
-    10
+  render_queue.push(
+    Pattern.basic_renderer(
+      looping.path,
+      "orange",
+      10
+    )
   )
-)
 
-objects_rendering.push(
-  Pattern.basic_renderer(
-    r_catch.offset(-2).join(looping.mirror(300).offset(1)).path,
-    "blue",
-    10
+  render_queue.push(
+    Pattern.basic_renderer(
+      r_catch.join(r_throw,l_catch,l_throw.offset(6)).offset(-2).loop(6).path,
+      "blue",
+      10
+    )
   )
-)
 
-objects_rendering.push(
-  Pattern.basic_renderer(
-    l_catch.offset(-5).join(l_catch.offset(-4), looping.offset(2)).path,
-    "red",
-    10
+  render_queue.push(
+    Pattern.basic_renderer(
+      l_catch.offset(-5).join(l_catch.offset(-4), looping.offset(2)).path,
+      "red",
+      10
+    )
   )
-)
+}
+
+basic_juggle(objects_rendering, left_hand, right_hand, gravity);
 
 function loop() {
   draw();

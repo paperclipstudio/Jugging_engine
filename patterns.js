@@ -156,6 +156,7 @@ export function ellipse(
 
 // Render takes Path and renders to a 2D Contex
 // Then returns true if it should be called again in the future
+// or returns false if it isn't going to render again to the screen
  
 
 export function trail_renderer(path, colour="black", size=1) {
