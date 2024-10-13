@@ -119,6 +119,59 @@ function linear_ball(start_time, length, colour, start, end, size) {
   return render;
 }
 
+linear_blueprint(colour, start, end, size) {
+  function blueprint(start_time, length) {
+    function render(t) {
+      const delta = t - start_time;
+      if (delta < 0) {
+        return true
+      }
+      if (delta > length) {
+        return false
+      }
+      let x = start.x + (end.x - start.x) * delta/length;
+      let y = start.y + (end.y - start.y) * delta/length;
+      ctx.fillStyle = colour
+      ctx.strokeStyle = colour
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.fill()
+      ctx.stroke()
+      return true
+    }
+
+    return render;
+  }
+  return blueprint;
+}
+
+function join_paths(path1, length, path2, length) {
+  function path(t) {
+    
+  }
+  
+}
+
+function join(first_path_blueprint, second_path_blueprint, ratio=0.5) {
+  function blueprint(start_time, length) => {
+    let first_length = length * ratio;
+    let second_start = start_time * first_length;
+    const first_path = first_path_blueprint(start_time, first_length);
+    const second_path = second_path_blueprint(second_start, length * (1-ratio));
+    function render(t) { 
+      const delta = t - start_time;
+      if (delta < 0) {
+        return true
+      }
+      if (delta < second_start) {
+        return first_path(t)
+      }
+    }
+
+  }
+  
+}
+
 
 function draw() {
   ctx.clearRect(0,0,800,600);
@@ -258,26 +311,23 @@ pattern_ctl.oninput = function() {
 }
 
 let count = 0
-
-setInterval(() => {
-  Pattern.gen_pattern(current_pattern,
-    now_s(),
-    ball_time,
-    count,
-    objects_rendering,
-    right_hand,
-    left_hand,
-    gravity)
-  count += 1
-  console.log("&&", count, now_s())
-}, ball_time * 1000 / speed)
+for (let i=0; i < 3; i++) {
+Pattern.gen_pattern(current_pattern,
+  ball_time * i, // Start time
+  ball_time,
+  i,  // Throw count
+  objects_rendering,
+  right_hand,
+  left_hand,
+  gravity);
+}
 
 
 function loop() {
-draw();
+  draw();
 
-//setTimeout(loop, Math.random() * 250 + 100);
-setTimeout(loop, 1000 / frame_rate);
+  //setTimeout(loop, Math.random() * 250 + 100);
+  setTimeout(loop, 1000 / frame_rate);
 }
 
 loop();
