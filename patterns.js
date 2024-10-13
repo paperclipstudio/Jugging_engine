@@ -158,6 +158,29 @@ export function ellipse(
 // Then returns true if it should be called again in the future
  
 
+export function trail_renderer(path, colour="black", size=1) {
+  let trail = [];
+  function render(t, ctx) {
+    let current = path(t);
+    if (current == true || current == false) {
+      return true;
+    }
+    trail.push(current);
+    for (let i = 0; i < trail.length; i++) {
+
+      ctx.fillStyle = colour
+      ctx.strokeStyle = colour
+      ctx.beginPath();
+      ctx.arc(trail[i].x, trail[i].y, size, 0, 2 * Math.PI);
+      ctx.fill()
+      ctx.stroke()
+    }
+    return true
+  }
+  return render;
+}
+
+
 export function basic_renderer(path, colour, size) {
   function render(t, ctx) {
     let current = path(t);

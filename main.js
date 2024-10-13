@@ -281,19 +281,6 @@ pattern_ctl.oninput = function() {
     console.log("Failed regex on ", this.value);
   }
 }
-/*
-let count = 0
-for (let i=0; i < 3; i++) {
-  Pattern.gen_pattern(current_pattern,
-    ball_time * i, // Start time
-    ball_time,
-    i,  // Throw count
-    objects_rendering,
-    right_hand,
-    left_hand,
-    gravity);
-}
-*/
 objects_rendering.push(
   Pattern.basic_renderer(
     Pattern.static_blueprint(
