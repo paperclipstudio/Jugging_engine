@@ -159,26 +159,23 @@ pattern_ctl.oninput = function() {
     console.log("Failed regex on ", this.value);
   }
 }
-
-objects_rendering.push(Pattern.basic_renderer(
-	BP.bouncing_ball(0, 10, {x:100, y:100}, {x:300, y:-200}, 400),
-	"red",
-	35
-))
-
-objects_rendering.push(Pattern.trail_renderer(
-	BP.bouncing_ball(0, 10, {x:100, y:100}, {x:400, y:100}, 400),
-	"black",
-	5
-))
-
+/*
 objects_rendering.push(Pattern.basic_renderer(
 	BP.still(0, 10, {x: 400, y:400}),
 	"red",
 	35
 ))
+*/
 
-basic_juggle(objects_rendering, left_hand, right_hand, gravity);
+// basic_juggle(objects_rendering, left_hand, right_hand, gravity);
+
+Pattern.gen_pattern_2(
+	[7,1,1],
+	10,
+	objects_rendering,
+	right_hand,
+	left_hand,
+	gravity=500)
 
 function loop() {
   draw();
