@@ -162,7 +162,8 @@ export function ellipse(
 export function trail_renderer(path, colour="black", size=1) {
   let trail = [];
   function render(t, ctx) {
-    let current = path(t);
+		console.log("PATH:", path.path(t));
+    let current = path.path(t);
     if (current == true || current == false) {
       return true;
     }
@@ -183,7 +184,7 @@ export function trail_renderer(path, colour="black", size=1) {
 
 export function basic_renderer(path, colour, size) {
   function render(t, ctx) {
-    let current = path(t);
+    let current = path.path(t);
     if (current == true || current == false) {
       return current;
     }
@@ -198,46 +199,10 @@ export function basic_renderer(path, colour, size) {
   return render;
 }
 
-export function falling_ball_blueprint(start_time, length, start, speed, G) {
-  function path(t) {
-    let delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return false
-    }
-    return {
-      x: start.x + (delta * speed.x),
-      y: start.y + (speed.y * delta) + (0.5 * G * Math.pow(delta,2))
-    }
-  }
-  return path;
-}
-
-export function static_blueprint(start_time, length, start) {
-  function path(t) {
-    let delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return false
-    }
-    return start;
-  }
-  return path;
-}
 
 // (path, length, path) -> (path)
 // Takes two paths and joins one on the end of the other
 
-
-export function juggling_ball_blueprint(from, to, start_time, fly_time, G=500) {
-  let vx = (to.x - from.x) / fly_time;
-  let vy = ((to.y - from.y) / fly_time) - (0.5 * G * fly_time)
-  return falling_ball_blueprint(start_time, fly_time, from, {x:vx, y:vy}, G);
-}
 
 export function juggling_ball(from, to, start_time, time, colour, G=1000) {
   let vx = (to.x - from.x) / time;

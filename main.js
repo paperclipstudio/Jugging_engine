@@ -16,7 +16,6 @@ var gravity = 200;
 
 let objects_rendering = [];
 
-var now_offset = 0;
 var speed = 1;
 function now_ms() {
   let date = new Date()
@@ -53,22 +52,9 @@ function draw() {
   });
   if (objects_rendering.length > 1000) {
     console.log("Too many objects")
-    console.log("Too many objects")
-    console.log("Too many objects")
-    console.log("Too many objects")
     objects_rendering = [];
     return;
   }
-  /*
-  console.log(objects_rendering.map((f)=> {
-    if (f == noop) {
-      return '0'
-    } else {
-      return '*'
-    }
-
-  }).join(""));
-  */
   while (objects_rendering[0] == noop) {
     objects_rendering.shift();
   }

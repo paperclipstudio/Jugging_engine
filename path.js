@@ -13,7 +13,9 @@ export default class Path {
     this.name = name;
   }
 
-
+  set_name(name) {
+		return new Path(this.path, name)
+  }
 
   join(...paths) {
     let names = "[";
