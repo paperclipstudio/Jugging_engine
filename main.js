@@ -1,6 +1,7 @@
 import * as Pattern from "./patterns.js"
 import Path from "./path.js"
 import basic_juggle from "./basic_juggle.js"
+import * as BP from "./blueprint.js"
 
 const canvas = document.getElementById("canvas");
 canvas.width = 800;
@@ -26,126 +27,13 @@ function now_s() {
   return now_ms() / 1000;
 }
 
-function noop(t) {
+function noop(_) {
   return true;
 }
 
 function colour_darken(colour) {
   return false
 }
-
-function bouncing_ball(start_time, length, colour, start, speed, size, shrink) {
-  function render(t) {
-
-    const delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return noop
-    }
-    let x  = start.x + delta * speed.x;
-    let y = start.y + (speed.y * delta) + (G/2 * Math.pow(delta,2))
-    size = size - shrink * delta;
-    size = Math.max(0, size);
-    if (size == 0) {
-      return noop;
-    }
-    const floor = 100;
-    ctx.fillStyle = colour
-    ctx.strokeStyle = colour
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, 2 * Math.PI);
-    ctx.fill()
-    ctx.stroke()
-
-    if (y > floor) {
-      return bouncing_ball(now_s(), length - delta, 
-        //randomColor(),
-        colour, 
-        x,
-        floor,
-        speed.x,
-        (speed.y + G *delta) * -0.8,
-        size,
-        shrink
-      );
-    }
-    return true
-  }
-  return render;
-}
-
-
-function static_ball(start_time, length, colour, start, size) {
-  function render(t) {
-
-    const delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return false
-    }
-    ctx.fillStyle = colour
-    ctx.strokeStyle = colour
-    ctx.beginPath();
-    ctx.arc(start.x, start.y, size, 0, 2 * Math.PI);
-    ctx.fill()
-    ctx.stroke()
-    return true
-  }
-  return render;
-}
-
-function linear_ball(start_time, length, colour, start, end, size) {
-  function render(t) {
-    const delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return false
-    }
-    let x = start.x + (end.x - start.x) * delta/length;
-    let y = start.y + (end.y - start.y) * delta/length;
-    ctx.fillStyle = colour
-    ctx.strokeStyle = colour
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, 2 * Math.PI);
-    ctx.fill()
-    ctx.stroke()
-    return true
-  }
-  return render;
-}
-
-function linear_blueprint(colour, start, end, size) {
-  function blueprint(start_time, length) {
-    function render(t) {
-      const delta = t - start_time;
-      if (delta < 0) {
-        return true
-      }
-      if (delta > length) {
-        return false
-      }
-      let x = start.x + (end.x - start.x) * delta/length;
-      let y = start.y + (end.y - start.y) * delta/length;
-      ctx.fillStyle = colour
-      ctx.strokeStyle = colour
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI);
-      ctx.fill()
-      ctx.stroke()
-      return true
-    }
-
-    return render;
-  }
-  return blueprint;
-}
-
 
 function draw() {
   ctx.clearRect(0,0,800,600);
@@ -285,6 +173,24 @@ pattern_ctl.oninput = function() {
     console.log("Failed regex on ", this.value);
   }
 }
+
+objects_rendering.push(Pattern.basic_renderer(
+	BP.bouncing_ball(0, 10, {x:100, y:100}, {x:300, y:-200}, 400),
+	"red",
+	35
+))
+
+objects_rendering.push(Pattern.trail_renderer(
+	BP.bouncing_ball(0, 10, {x:100, y:100}, {x:400, y:100}, 400),
+	"black",
+	5
+))
+
+objects_rendering.push(Pattern.basic_renderer(
+	BP.still(0, 10, {x: 400, y:400}),
+	"red",
+	35
+))
 
 basic_juggle(objects_rendering, left_hand, right_hand, gravity);
 
