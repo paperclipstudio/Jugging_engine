@@ -241,16 +241,16 @@ export function gen_pattern_2(
 	//ball = 1;
 		let current_throw
 		let ball_path = []
-		let landing = ball
+		let landing = ball % pattern.length;
 		do {
-			current_throw = pattern[landing];
+			current_throw = pattern[landing % pattern.length];
 			ball_path.push(current_throw);
 			landing = (landing + current_throw) % pattern.length;
 			if (ball_path.length > 20) {
 				break;
 			}
 		}
-		while (landing != ball || ball_path.length % 2 != 0) 
+		while (landing != (ball % pattern.length) || ball_path.length % 2 != 0) 
 	
 		let path = new Path();
 		let throw_time = 0;
