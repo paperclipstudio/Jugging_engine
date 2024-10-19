@@ -121,7 +121,14 @@ canvas.onmousemove = function(e) {
     left_hand_i = {x:left_hand.x + pull_in, y:e.offsetY}
   }
   objects_rendering = [];
-  basic_juggle(objects_rendering, left_hand, right_hand, gravity);
+
+Pattern.gen_pattern_2(
+	[5,3,1],
+	0.5,
+	objects_rendering,
+	right_hand,
+	left_hand,
+	gravity=500)
 };
 
 var gravity_ctl = document.getElementById("gravity_ctl");
@@ -170,8 +177,8 @@ objects_rendering.push(Pattern.basic_renderer(
 // basic_juggle(objects_rendering, left_hand, right_hand, gravity);
 
 Pattern.gen_pattern_2(
-	[7,1,1],
-	10,
+	[5,3,1],
+	0.5,
 	objects_rendering,
 	right_hand,
 	left_hand,

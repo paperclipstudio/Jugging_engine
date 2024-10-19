@@ -221,28 +221,27 @@ export function gen_pattern_2(
 	left_hand,
 	gravity) {
 
-/*	
-	console.log(render_queue);
 	render_queue.push(
 		basic_renderer(
-			BP.still(0,1,left_hand).loop(2), 
+			BP.still(0,1,left_hand).loop(1), 
 			"yellow",
 			12
 		),
 		basic_renderer(
-		BP.still(0, 1, right_hand).loop(2),
+		BP.still(0, 1, right_hand).loop(1),
 		"yellow",
 		12)
 	)
-	*/
 	let total_throw_count = pattern.reduce((sum, cur) => { return sum + cur }, 0);
 
 	let ball_count = total_throw_count / pattern.length;
 
-	for (let ball = 0; ball < 1; ball++) {
-		let current_throw;;
-		let ball_path = [];
-		let landing = ball;
+	for (let ball = 0; ball < ball_count; ball++) {
+	//for (let ball = 0; ball < 1; ball++) {
+	//ball = 1;
+		let current_throw
+		let ball_path = []
+		let landing = ball
 		do {
 			current_throw = pattern[landing];
 			ball_path.push(current_throw);
@@ -251,29 +250,25 @@ export function gen_pattern_2(
 				break;
 			}
 		}
-		while (landing != ball) 
+		while (landing != ball || ball_path.length % 2 != 0) 
 	
 		let path = new Path();
 		let throw_time = 0;
 		for (let _throw = 0; _throw < ball_path.length; _throw++) {
 			let height = ball_path[_throw];
 			throw_time += height;
-			let from_hand = (_throw % 2 == 0)? left_hand : right_hand;
+			let from_hand = ((_throw + ball) % 2 == 0)? left_hand : right_hand;
 			let to_hand = (from_hand == left_hand)? right_hand : left_hand;
 			if (height % 2 == 0) {
 				// throw to same hand
 				to_hand = from_hand
 			}
-			console.log(from_hand, to_hand, _throw, height, throw_time)	
-			
 			path = path.join(
-				BP.juggling_ball(from_hand, to_hand, _throw, height/4).set_name("ball|" + _throw + "|" + height)
-					.slice(throw_time)
+				BP.juggling_ball(from_hand, to_hand, (throw_time - height) * ball_time, height * ball_time)
+					.set_name("ball|" + _throw + "|" + height)
 			)
 		}
-		console.log(path.path(1), path.name);
-			render_queue.push(basic_renderer(path, "pink", 4))
-		//render_queue.push(trail_renderer(BP.juggling_ball(left_hand, right_hand, 0, 3), "pink", 15))
+		render_queue.push(basic_renderer(path.loop(6 * ball_time).offset(ball * ball_time), "pink", 4))
 	}
 }
 

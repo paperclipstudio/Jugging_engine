@@ -45,7 +45,7 @@ export default class Path {
         offset += length; 
       }
       return this.path(t - offset);
-    }, this.name += "-> LOOP:", length)
+    }, this.name += "-> LOOP:" + length)
   }
 
 	slice(end) {
@@ -54,13 +54,13 @@ export default class Path {
 				return false
 			} 
       return this.path(t);
-    }, this.name += "-> Slice:", length)
+    }, this.name += "-> Slice:" + end)
 	}
 
   offset(offset) {
     return new Path((t) => {
       return this.path(t - offset);
-    }, this.name += "-> OFFSET:", offset)
+    }, this.name += "-> OFFSET:" + offset)
   }
 
   mirror(x_line) {
