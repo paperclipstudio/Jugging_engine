@@ -121,19 +121,13 @@ canvas.onmousemove = function(e) {
     left_hand_i = {x:left_hand.x + pull_in, y:e.offsetY}
   }
   objects_rendering = [];
-
-Pattern.gen_pattern_2(
-	[5,3,1],
-	0.5,
-	objects_rendering,
-	right_hand,
-	left_hand,
-	gravity=500)
+	refresh()
 };
 
 var gravity_ctl = document.getElementById("gravity_ctl");
 gravity_ctl.oninput = function() {
   gravity = this.value;
+	refresh()
 }
 
 var speed_ctl = document.getElementById("speed_ctl");
@@ -143,17 +137,19 @@ speed_ctl.oninput = function() {
   let now = now_ms();
   speed = this.value;
   start_time = now - speed * real;
-  objects_rendering = []
+	refresh()
 }
 
 var ball_time_ctl = document.getElementById("ball_time_ctl");
 ball_time_ctl.oninput = function() {
   ball_time = this.value;
+	refresh()
 }
 var frame_rate_ctl = document.getElementById("frame_rate_ctl");
 var frame_rate = 60;
 frame_rate_ctl.oninput = function() {
   frame_rate = this.value;
+	refresh()
 }
 
 var pattern_ctl = document.getElementById("pattern_ctl");
@@ -162,6 +158,7 @@ const pattern_regex = new RegExp("^(?:\\d+,)*\\d+$");
 pattern_ctl.oninput = function() {
   if (pattern_regex.test(this.value)) {
     current_pattern = this.value.split(',').map((s) =>  parseInt(s, 10))
+		refresh()
   } else {
     console.log("Failed regex on ", this.value);
   }
@@ -176,19 +173,24 @@ objects_rendering.push(Pattern.basic_renderer(
 
 // basic_juggle(objects_rendering, left_hand, right_hand, gravity);
 
-Pattern.gen_pattern_2(
-	[5,3,1],
-	0.5,
-	objects_rendering,
-	right_hand,
-	left_hand,
-	gravity=500)
 
 function loop() {
   draw();
   //setTimeout(loop, Math.random() * 250 + 100);
   setTimeout(loop, 1000 / frame_rate);
 }
+
+function refresh() {
+  objects_rendering = []
+Pattern.gen_pattern_2(
+	current_pattern,
+	0.5,
+	objects_rendering,
+	right_hand,
+	left_hand,
+	gravity=500)
+};
+refresh()
 
 loop();
 
