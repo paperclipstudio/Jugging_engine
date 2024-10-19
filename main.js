@@ -153,7 +153,7 @@ frame_rate_ctl.oninput = function() {
 }
 
 var pattern_ctl = document.getElementById("pattern_ctl");
-var current_pattern = [3];
+var current_pattern = [5,1];
 const pattern_regex = new RegExp("^(?:\\d+,)*\\d+$");
 pattern_ctl.oninput = function() {
   if (pattern_regex.test(this.value)) {

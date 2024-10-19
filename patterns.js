@@ -240,7 +240,9 @@ export function gen_pattern_2(
 
 	for (let ball = 0; ball < ball_count; ball++) {
 	//for (let ball = 0; ball < 1; ball++) {
-	//ball = 1;
+	//ball = 2;
+		// TODO fix [5,1] as the third ball, is thrown on third throw,
+		// which is also when the second ball is thrown (for it's second time)
 		let current_throw
 		let ball_path = []
 		let landing = ball % pattern.length;
