@@ -221,6 +221,8 @@ export function gen_pattern_2(
 	left_hand,
 	gravity) {
 
+	let swap_hand = (hand) => (hand == left_hand)? right_hand : left_hand;
+
 	render_queue.push(
 		basic_renderer(
 			BP.still(0,1,left_hand).loop(1), 
@@ -254,21 +256,21 @@ export function gen_pattern_2(
 	
 		let path = new Path();
 		let throw_time = 0;
+		let from_hand = (ball % 2 == 0)? left_hand : right_hand;
 		for (let _throw = 0; _throw < ball_path.length; _throw++) {
 			let height = ball_path[_throw];
-			throw_time += height;
-			let from_hand = ((_throw + ball) % 2 == 0)? left_hand : right_hand;
-			let to_hand = (from_hand == left_hand)? right_hand : left_hand;
-			if (height % 2 == 0) {
-				// throw to same hand
-				to_hand = from_hand
-			}
+			let to_hand = (height % 2 == 0)? from_hand : swap_hand(from_hand)
+			throw_time += height
 			path = path.join(
 				BP.juggling_ball(from_hand, to_hand, (throw_time - height) * ball_time, height * ball_time)
-					.set_name("ball|" + _throw + "|" + height)
+					.set_name("ball|" + ball + " throw->" + _throw + "|" + height)
 			)
+			console.log(path)
+			from_hand = to_hand;
 		}
-		render_queue.push(basic_renderer(path.loop(6 * ball_time).offset(ball * ball_time), "pink", 4))
+		let ball_colours = ["Red", "Blue", "Green", "Yellow", "Purple", "Magenta", "Cyan"]
+		render_queue.push(basic_renderer(path.loop(ball_count * 2 * ball_time).offset(ball * ball_time),
+			ball_colours[ball], 4))
 	}
 }
 
