@@ -239,6 +239,23 @@ export function juggling_ball_blueprint(from, to, start_time, fly_time, G=500) {
   return falling_ball_blueprint(start_time, fly_time, from, {x:vx, y:vy}, G);
 }
 
+export function wob_ball_blueprint(from, to, start_time, fly_time, jiggle, G=500) {
+  let vx = (to.x - from.x) / fly_time;
+  let vy = ((to.y - from.y) / fly_time) - (0.5 * G * fly_time)
+  let fall = falling_ball_blueprint(start_time, fly_time, from, {x:vx, y:vy}, G);
+  function path(t) {
+    let location = fall(t);
+    if (location === true || location === false) {
+      return location;
+    }
+    return {
+      x: location.x + Math.random() * jiggle,
+      y: location.y + Math.random() * jiggle
+    }
+  }
+  return path;
+}
+
 export function juggling_ball(from, to, start_time, time, colour, G=1000) {
   let vx = (to.x - from.x) / time;
   let vy = ((to.y - from.y) / time) - (0.5 * G * time)
