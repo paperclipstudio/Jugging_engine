@@ -5,7 +5,9 @@
 // True: if the time is before
 
 
-function null_path(_) {return false};
+function null_path(_) {
+	return false
+};
 
 export default class Path {
   constructor(path=null_path, name="Null") {
@@ -13,7 +15,9 @@ export default class Path {
     this.name = name;
   }
 
-
+  set_name(name) {
+		return new Path(this.path, name)
+  }
 
   join(...paths) {
     let names = "[";
@@ -41,13 +45,22 @@ export default class Path {
         offset += length; 
       }
       return this.path(t - offset);
-    }, this.name += "-> LOOP:", length)
+    }, this.name += "-> LOOP:" + length)
   }
+
+	slice(end) {
+    return new Path((t) => {
+			if (t > end) {
+				return false
+			} 
+      return this.path(t);
+    }, this.name += "-> Slice:" + end)
+	}
 
   offset(offset) {
     return new Path((t) => {
       return this.path(t - offset);
-    }, this.name += "-> OFFSET:", offset)
+    }, this.name += "-> OFFSET:" + offset)
   }
 
   mirror(x_line) {

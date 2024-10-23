@@ -1,6 +1,7 @@
 import * as Pattern from "./patterns.js"
 import Path from "./path.js"
 import basic_juggle from "./basic_juggle.js"
+import * as BP from "./blueprint.js"
 
 const canvas = document.getElementById("canvas");
 canvas.width = 800;
@@ -15,7 +16,6 @@ var gravity = 200;
 
 let objects_rendering = [];
 
-var now_offset = 0;
 var speed = 1;
 function now_ms() {
   let date = new Date()
@@ -26,126 +26,13 @@ function now_s() {
   return now_ms() / 1000;
 }
 
-function noop(t) {
+function noop(_) {
   return true;
 }
 
 function colour_darken(colour) {
   return false
 }
-
-function bouncing_ball(start_time, length, colour, start, speed, size, shrink) {
-  function render(t) {
-
-    const delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return noop
-    }
-    let x  = start.x + delta * speed.x;
-    let y = start.y + (speed.y * delta) + (G/2 * Math.pow(delta,2))
-    size = size - shrink * delta;
-    size = Math.max(0, size);
-    if (size == 0) {
-      return noop;
-    }
-    const floor = 100;
-    ctx.fillStyle = colour
-    ctx.strokeStyle = colour
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, 2 * Math.PI);
-    ctx.fill()
-    ctx.stroke()
-
-    if (y > floor) {
-      return bouncing_ball(now_s(), length - delta, 
-        //randomColor(),
-        colour, 
-        x,
-        floor,
-        speed.x,
-        (speed.y + G *delta) * -0.8,
-        size,
-        shrink
-      );
-    }
-    return true
-  }
-  return render;
-}
-
-
-function static_ball(start_time, length, colour, start, size) {
-  function render(t) {
-
-    const delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return false
-    }
-    ctx.fillStyle = colour
-    ctx.strokeStyle = colour
-    ctx.beginPath();
-    ctx.arc(start.x, start.y, size, 0, 2 * Math.PI);
-    ctx.fill()
-    ctx.stroke()
-    return true
-  }
-  return render;
-}
-
-function linear_ball(start_time, length, colour, start, end, size) {
-  function render(t) {
-    const delta = t - start_time;
-    if (delta < 0) {
-      return true
-    }
-    if (delta > length) {
-      return false
-    }
-    let x = start.x + (end.x - start.x) * delta/length;
-    let y = start.y + (end.y - start.y) * delta/length;
-    ctx.fillStyle = colour
-    ctx.strokeStyle = colour
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, 2 * Math.PI);
-    ctx.fill()
-    ctx.stroke()
-    return true
-  }
-  return render;
-}
-
-function linear_blueprint(colour, start, end, size) {
-  function blueprint(start_time, length) {
-    function render(t) {
-      const delta = t - start_time;
-      if (delta < 0) {
-        return true
-      }
-      if (delta > length) {
-        return false
-      }
-      let x = start.x + (end.x - start.x) * delta/length;
-      let y = start.y + (end.y - start.y) * delta/length;
-      ctx.fillStyle = colour
-      ctx.strokeStyle = colour
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI);
-      ctx.fill()
-      ctx.stroke()
-      return true
-    }
-
-    return render;
-  }
-  return blueprint;
-}
-
 
 function draw() {
   ctx.clearRect(0,0,800,600);
@@ -165,22 +52,9 @@ function draw() {
   });
   if (objects_rendering.length > 1000) {
     console.log("Too many objects")
-    console.log("Too many objects")
-    console.log("Too many objects")
-    console.log("Too many objects")
     objects_rendering = [];
     return;
   }
-  /*
-  console.log(objects_rendering.map((f)=> {
-    if (f == noop) {
-      return '0'
-    } else {
-      return '*'
-    }
-
-  }).join(""));
-  */
   while (objects_rendering[0] == noop) {
     objects_rendering.shift();
   }
@@ -247,12 +121,13 @@ canvas.onmousemove = function(e) {
     left_hand_i = {x:left_hand.x + pull_in, y:e.offsetY}
   }
   objects_rendering = [];
-  basic_juggle(objects_rendering, left_hand, right_hand, gravity);
+	refresh()
 };
 
 var gravity_ctl = document.getElementById("gravity_ctl");
 gravity_ctl.oninput = function() {
   gravity = this.value;
+	refresh()
 }
 
 var speed_ctl = document.getElementById("speed_ctl");
@@ -262,37 +137,60 @@ speed_ctl.oninput = function() {
   let now = now_ms();
   speed = this.value;
   start_time = now - speed * real;
-  objects_rendering = []
+	refresh()
 }
 
 var ball_time_ctl = document.getElementById("ball_time_ctl");
 ball_time_ctl.oninput = function() {
   ball_time = this.value;
+	refresh()
 }
 var frame_rate_ctl = document.getElementById("frame_rate_ctl");
 var frame_rate = 60;
 frame_rate_ctl.oninput = function() {
   frame_rate = this.value;
+	refresh()
 }
 
 var pattern_ctl = document.getElementById("pattern_ctl");
-var current_pattern = [3];
+var current_pattern = [5,1];
 const pattern_regex = new RegExp("^(?:\\d+,)*\\d+$");
 pattern_ctl.oninput = function() {
   if (pattern_regex.test(this.value)) {
     current_pattern = this.value.split(',').map((s) =>  parseInt(s, 10))
+		refresh()
   } else {
     console.log("Failed regex on ", this.value);
   }
 }
+/*
+objects_rendering.push(Pattern.basic_renderer(
+	BP.still(0, 10, {x: 400, y:400}),
+	"red",
+	35
+))
+*/
 
-basic_juggle(objects_rendering, left_hand, right_hand, gravity);
+// basic_juggle(objects_rendering, left_hand, right_hand, gravity);
+
 
 function loop() {
   draw();
   //setTimeout(loop, Math.random() * 250 + 100);
   setTimeout(loop, 1000 / frame_rate);
 }
+
+function refresh() {
+  objects_rendering = []
+Pattern.gen_pattern_2(
+	current_pattern,
+	0.5,
+	objects_rendering,
+	right_hand,
+	left_hand,
+	gravity=500)
+};
+refresh()
 
 loop();
 
